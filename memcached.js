@@ -5,7 +5,7 @@ const Node = require('./node');
  * @param {Number} Memcached.limit - The limit of Nodes to be stored.
  * @param {Node} Memcached.head - The last used node.
  * @param {Node} Memcached.tail - The least used node.
- * @param {Map<string, number>} Memcached.cache - The Node stored.
+ * @param {Map<string, Node>} Memcached.cache - Where the Nodes are stored.
  */
 class Memcached {
     constructor (limit = 100){
@@ -15,7 +15,7 @@ class Memcached {
         this.cache = new Map()
     }
     /**
-     * Node is the class being stored as the value in the memcached cache.
+     * This function allows us to update or add a Node to the memcached.
      * @param {string} key - The key of the node to add to the memcached.
      * @param {Number} flags - The flags of the node to add to the memcached.
      * @param {Number} exptime - The expiration time of the node to add to the memcached, this is measured in seconds.
@@ -32,6 +32,9 @@ class Memcached {
             this.updateNode(oldNode, flags, exptime, bytes, datablock, this);
             if (!noreply){
                 return "STORED\r\n";
+            }
+            else {
+                return null;
             }
         }
         else{
@@ -51,8 +54,29 @@ class Memcached {
             if (!noreply){
                 return "STORED\r\n";
             }
+            else{
+                return null;
+            }
         }
 
+    }
+
+    /**
+     * This function allows us to retrieve the value of one or more keys stored in the memcached.
+     * @param {[string]} keys - The key(s) of the node(s) to retrive of memcached.
+     * @returns {[string]} - The value(s) of the key(s) of retrived node(s).
+     */
+    get(keys){
+        let results = [];
+        keys.forEach(key => {
+            let node = this.cache.get(key);
+            if (node){
+                results.push(`VALUE ${node.key} ${node.flags} ${node.bytes}\r\n`);
+                results.push(`${node.datablock}\r\n`);
+            }
+        });
+        results.push("END\r\n");
+        return results;
     }
 
     ensureLimit(){
