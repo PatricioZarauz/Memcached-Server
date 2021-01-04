@@ -1,0 +1,20 @@
+{
+  "name": "Memcached-Server",
+  "version": "0.0.1",
+  "description": "Memcached Server for the Moove-It coding challenges",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PatricioZarauz/Memcached-Server.git"
+  },
+  "keywords": [],
+  "author": "Patricio Zarauz <pwzarauz@gmail.com>",
+  "license": "GNU General Public License v3.0",
+  "bugs": {
+    "url": "https://github.com/PatricioZarauz/Memcached-Server/issues"
+  },
+  "homepage": "https://github.com/PatricioZarauz/Memcached-Server#readme"
+}
