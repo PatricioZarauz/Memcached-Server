@@ -25,19 +25,35 @@ class Memcached {
      * @returns {string} - The result of setting the node.
      */
     set(key, flags, exptime, bytes, noreply = false, datablock) {
+        let addRes = this.add(key, flags, exptime, bytes, noreply, datablock);
 
-        const oldNode = this.cache.get(key);
-
-        if (oldNode){
-            this.updateNode(oldNode, flags, exptime, bytes, datablock, this);
-            if (!noreply){
-                return "STORED\r\n";
+        if (addRes === "NOT_STORED\r\n"){
+            let replaceRes = this.replace(key, flags, exptime, bytes, noreply, datablock);
+            if (replaceRes === "STORED\r\n"){
+                return replaceRes;
             }
             else {
                 return null;
             }
         }
-        else{
+        else {
+            return addRes;
+        }
+    }
+
+    /**
+     * This function allows us to add a Node to the memcached that is not currently in the memcached.
+     * @param {string} key - The key of the node to add to the memcached.
+     * @param {Number} flags - The flags of the node to add to the memcached.
+     * @param {Number} exptime - The expiration time of the node to add to the memcached, this is measured in seconds.
+     * @param {Number} bytes - The amount of bytes of the datablock of the node to add to the memcached.
+     * @param {string} noreply - A boolean flag that says if the client wants a reply of the operation
+     * @param {string} datablock - The datablock of the node to add to the memcached.
+     * @returns {string} - The result of setting the node.
+     */
+    add(key, flags, exptime, bytes, noreply = false, datablock){
+        const oldNode = this.cache.get(key);
+        if (!oldNode){
             this.ensureLimit();
 
             if (!this.head){
@@ -58,7 +74,41 @@ class Memcached {
                 return null;
             }
         }
+        else {
+            if (!noreply){
+                return "NOT_STORED\r\n";
+            }
+            else{
+                return null;
+            }
+        }
+    }
 
+    /**
+     * This function allows us to replce a Node of the memcached.
+     * @param {string} key - The key of the node to replace to the memcached.
+     * @param {Number} flags - The flags of the node to replace to the memcached.
+     * @param {Number} exptime - The expiration time of the node to update of the memcached, this is measured in seconds.
+     * @param {Number} bytes - The amount of bytes of the datablock of the node to add to the memcached.
+     * @param {string} noreply - A boolean flag that says if the client wants a reply of the operation.
+     * @param {string} datablock - The datablock of the node to add to the memcached.
+     * @returns {string} - The result of setting the node.
+     */
+    replace(key, flags, exptime, bytes, noreply = false, datablock){
+        const oldNode = this.cache.get(key);
+
+        if (oldNode){
+            this.updateNode(oldNode, flags, exptime, bytes, datablock, this);
+            if (!noreply){
+                return "STORED\r\n";
+            }
+            else {
+                return null;
+            }
+        }
+        else {
+            return "NOT_STORED\r\n";
+        }
     }
 
     /**
