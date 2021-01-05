@@ -85,7 +85,7 @@ class Memcached {
     }
 
     /**
-     * This function allows us to replce a Node of the memcached.
+     * This function allows us to replace a Node of the memcached.
      * @param {string} key - The key of the node to replace to the memcached.
      * @param {Number} flags - The flags of the node to replace to the memcached.
      * @param {Number} exptime - The expiration time of the node to update of the memcached, this is measured in seconds.
@@ -108,6 +108,70 @@ class Memcached {
         }
         else {
             return "NOT_STORED\r\n";
+        }
+    }
+
+    /**
+     * This function allows us to concatenate at the end of the datablock of the desired node (that already exists in the memcached) the datablock desired.
+     * @param {string} key - The key of the node to concatenate the datablock to.
+     * @param {Number} flags - The flags of the node to concatenate the datablock to.
+     * @param {Number} exptime - The new expiration time of the node having it's datablock concatenated, this is measured in seconds.
+     * @param {Number} bytes - The amount of bytes of the new datablock of the node to add to the memcached.
+     * @param {string} noreply - A boolean flag that says if the client wants a reply of the operation.
+     * @param {string} datablock - The datablock of the node to contatenate at the end of the original datablock stored in the memcached.
+     * @returns {string} - The result if the node was updated or not.
+     */
+    append(key, flags, exptime, bytes, noreply = false, datablock){
+        const oldNode = this.cache.get(key);
+
+        if (oldNode){
+            this.updateNode(oldNode, flags, exptime, oldNode.bytes + bytes, oldNode.datablock + datablock, this);
+            if (!noreply){
+                return "STORED\r\n";
+            }
+            else {
+                return null;
+            }
+        }
+        else {
+            if (!noreply){
+                return "NOT_STORED\r\n";
+            }
+            else {
+                return null;
+            }
+        }
+    }
+
+    /**
+     * This function allows us to concatenate at the begining of the datablock of the desired node (that already exists in the memcached) the datablock desired.
+     * @param {string} key - The key of the node to concatenate the datablock to.
+     * @param {Number} flags - The flags of the node to concatenate the datablock to.
+     * @param {Number} exptime - The new expiration time of the node having it's datablock concatenated, this is measured in seconds.
+     * @param {Number} bytes - The amount of bytes of the new datablock of the node to add to the memcached.
+     * @param {string} noreply - A boolean flag that says if the client wants a reply of the operation.
+     * @param {string} datablock - The datablock of the node to contatenate at the begining of the original datablock stored in the memcached.
+     * @returns {string} - The result if the node was updated or not.
+     */
+    prepend(key, flags, exptime, bytes, noreply = false, datablock){
+        const oldNode = this.cache.get(key);
+
+        if (oldNode){
+            this.updateNode(oldNode, flags, exptime, oldNode.bytes + bytes, datablock + oldNode.datablock, this);
+            if (!noreply){
+                return "STORED\r\n";
+            }
+            else {
+                return null;
+            }
+        }
+        else {
+            if (!noreply){
+                return "NOT_STORED\r\n";
+            }
+            else {
+                return null;
+            }
         }
     }
 
