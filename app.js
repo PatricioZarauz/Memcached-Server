@@ -13,7 +13,7 @@ server.on("connection", function(socket){
 
     var data = [];
     // When a new client is connected, the following message is logged in console.
-    console.log("New client was connected!\n");
+    console.log("New client was connected!");
 
     // When a new client is connected, the following message will appear in their console.
     socket.write("Welcome to Patricio's Memcached-Server!\n");
@@ -174,7 +174,7 @@ server.on("connection", function(socket){
                     }
                     break;
                 case "gets":
-                    console.log("Waiting to be develop");
+                    console.log("Waiting to be developed");
                     break;
                 default:
                     socket.write("ERROR\r\n");
@@ -219,17 +219,17 @@ server.on("connection", function(socket){
 
     //When the connection with a client is lost, a message is logged on console saying which connection was terminated.
     socket.once("close", function(){
-        console.log(`Connection from ${remoteAddress} was terminated\n`);
+        console.log(`Connection from ${remoteAddress} was terminated`);
     });
 
     //When an error from the client is detected, the error message is log on console.
     socket.on("error", function(err){
-        console.log(`Connection ${remoteAddress} error: ${err.message}\n`);
+        console.log(`Connection ${remoteAddress} error: ${err.message}`);
     });
 
 });
 
 // When the server it's running, a message showing it's information will be logged in console.
 server.listen(port, function(){
-    console.log("Server listening on %j\n", server.address());
+    console.log("Server listening on %j", server.address());
 });
