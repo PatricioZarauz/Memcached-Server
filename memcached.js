@@ -14,6 +14,7 @@ class Memcached {
         this.tail = null
         this.cache = new Map()
     }
+
     /**
      * This function allows us to update or add a Node to the memcached.
      * @param {string} key - The key of the node to add to the memcached.
@@ -24,11 +25,11 @@ class Memcached {
      * @param {string} datablock - The key of the node to add to the memcached.
      * @returns {string} - The result of setting the node.
      */
-    set(key, flags, exptime, bytes, noreply = false, datablock) {
-        let addRes = this.add(key, flags, exptime, bytes, noreply, datablock);
+    set(key, flags, exptime, bytes, datablock, noreply = false,) {
+        let addRes = this.add(key, flags, exptime, bytes, datablock, noreply);
 
         if (addRes === "NOT_STORED\r\n"){
-            let replaceRes = this.replace(key, flags, exptime, bytes, noreply, datablock);
+            let replaceRes = this.replace(key, flags, exptime, bytes, datablock, noreply);
             if (replaceRes === "STORED\r\n"){
                 return replaceRes;
             }
@@ -51,7 +52,7 @@ class Memcached {
      * @param {string} datablock - The datablock of the node to add to the memcached.
      * @returns {string} - The result of setting the node.
      */
-    add(key, flags, exptime, bytes, noreply = false, datablock){
+    add(key, flags, exptime, bytes, datablock, noreply = false){
         const oldNode = this.cache.get(key);
         if (!oldNode){
             this.ensureLimit();
@@ -94,7 +95,7 @@ class Memcached {
      * @param {string} datablock - The datablock of the node to add to the memcached.
      * @returns {string} - The result of setting the node.
      */
-    replace(key, flags, exptime, bytes, noreply = false, datablock){
+    replace(key, flags, exptime, bytes, datablock, noreply = false){
         const oldNode = this.cache.get(key);
 
         if (oldNode){
@@ -121,7 +122,7 @@ class Memcached {
      * @param {string} datablock - The datablock of the node to contatenate at the end of the original datablock stored in the memcached.
      * @returns {string} - The result if the node was updated or not.
      */
-    append(key, flags, exptime, bytes, noreply = false, datablock){
+    append(key, flags, exptime, bytes, datablock, noreply = false){
         const oldNode = this.cache.get(key);
 
         if (oldNode){
@@ -153,7 +154,7 @@ class Memcached {
      * @param {string} datablock - The datablock of the node to contatenate at the begining of the original datablock stored in the memcached.
      * @returns {string} - The result if the node was updated or not.
      */
-    prepend(key, flags, exptime, bytes, noreply = false, datablock){
+    prepend(key, flags, exptime, bytes, datablock, noreply = false){
         const oldNode = this.cache.get(key);
 
         if (oldNode){
