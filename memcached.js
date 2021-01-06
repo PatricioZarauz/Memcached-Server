@@ -215,8 +215,10 @@ class Memcached {
         node.bytes = bytes;
         node.datablock = datablock;
         if (memcached.cache.size > 1){
-            node.prev.next = node.next;
-            node.prev = null;
+            if (node.prev != null){
+                node.prev.next = node.next;
+                node.prev = null;
+            }
             node.next = memcached.head;
             memcached.head = node;
         }
