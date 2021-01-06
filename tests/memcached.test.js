@@ -366,3 +366,71 @@ test('Get the value and information of one or more desired nodes, when the memca
     memcached.add("last", 16, 0, 4, "LAST");
     expect(memcached.get(["hola", "last"])).toEqual(["VALUE hola 15 4\r\n", "HOLA\r\n", "VALUE last 16 4\r\n", "LAST\r\n","END\r\n"]);
 })
+
+test('Set a node when the memcached is empty', () =>{
+    const memcached = new Memcached();
+
+    expect(memcached.set("hola", 15, 0, 4, "HOLA")).toEqual("STORED\r\n");
+
+
+    expect(memcached.cache.size).toEqual(1);
+    expect(memcached.head.key).toEqual("hola");
+})
+
+test('Set a node when the memcached already contains it', () =>{
+    const memcached = new Memcached();
+
+    memcached.add("hola", 15, 0, 4, "HOLA");
+    expect(memcached.set("hola", 15, 0, 5, "HOLAX")).toEqual("STORED\r\n");
+
+
+    expect(memcached.cache.size).toEqual(1);
+    expect(memcached.head.key).toEqual("hola");
+    expect(memcached.head.datablock).toEqual("HOLAX");
+})
+
+test('Set a node when the memcached has nodes, but doesn\'t contains the desired one', () =>{
+    const memcached = new Memcached();
+
+    memcached.add("hola", 15, 0, 4, "HOLA");
+    expect(memcached.set("last", 15, 0, 4, "LAST")).toEqual("STORED\r\n");
+
+
+    expect(memcached.cache.size).toEqual(2);
+    expect(memcached.head.key).toEqual("last");
+    expect(memcached.head.datablock).toEqual("LAST");
+})
+
+test('Set a node when the memcached is empty, with noreply', () =>{
+    const memcached = new Memcached();
+
+    expect(memcached.set("hola", 15, 0, 4, "HOLA", true)).toEqual(null);
+
+
+    expect(memcached.cache.size).toEqual(1);
+    expect(memcached.head.key).toEqual("hola");
+})
+
+test('Set a node when the memcached already contains it, with noreply', () =>{
+    const memcached = new Memcached();
+
+    memcached.add("hola", 15, 0, 4, "HOLA");
+    expect(memcached.set("hola", 15, 0, 5, "HOLAX", true)).toEqual(null);
+
+
+    expect(memcached.cache.size).toEqual(1);
+    expect(memcached.head.key).toEqual("hola");
+    expect(memcached.head.datablock).toEqual("HOLAX");
+})
+
+test('Set a node when the memcached has nodes, but doesn\'t contains the desired one, with noreply', () =>{
+    const memcached = new Memcached();
+
+    memcached.add("hola", 15, 0, 4, "HOLA");
+    expect(memcached.set("last", 15, 0, 4, "LAST", true)).toEqual(null);
+
+
+    expect(memcached.cache.size).toEqual(2);
+    expect(memcached.head.key).toEqual("last");
+    expect(memcached.head.datablock).toEqual("LAST");
+})
