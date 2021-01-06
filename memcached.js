@@ -112,7 +112,13 @@ class Memcached {
             }
         }
         else {
-            return "NOT_STORED\r\n";
+            if (!noreply){
+                return "NOT_STORED\r\n";
+            }
+            else{
+                return null;
+            }
+
         }
     }
 
@@ -221,8 +227,11 @@ class Memcached {
         if (memcached.cache.size > 1){
             if (node.prev != null){
                 node.prev.next = node.next;
-                node.prev = null;
             }
+            if (node.next != null){
+                node.next.prev = node.prev;
+            }
+            node.prev = null;
             node.next = memcached.head;
             memcached.head = node;
         }
