@@ -26,19 +26,18 @@ class Memcached {
      * @returns {string} - The result of setting the node.
      */
     set(key, flags, exptime, bytes, datablock, noreply = false,) {
-        let addRes = this.add(key, flags, exptime, bytes, datablock, noreply);
+        let addRes = this.add(key, flags, exptime, bytes, datablock, false);
 
-        if (addRes === "NOT_STORED\r\n"){
-            let replaceRes = this.replace(key, flags, exptime, bytes, datablock, noreply);
-            if (replaceRes === "STORED\r\n"){
-                return replaceRes;
-            }
-            else {
+        if (addRes === "STORED\r\n"){
+            if (noreply){
                 return null;
+            }
+            else{
+                return addRes;
             }
         }
         else {
-            return addRes;
+            return this.replace(key, flags, exptime, bytes, datablock, noreply);
         }
     }
 
