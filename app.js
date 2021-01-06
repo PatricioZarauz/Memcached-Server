@@ -23,6 +23,7 @@ server.on("connection", function(socket){
         infoClean = infoClean.replace("\r", "");
         if (data.length > 1){
             memcachedFunctionExecuter(data);
+            data = [];
         }
         else{
             var infoSeparated = infoClean.split(" ");
@@ -38,7 +39,7 @@ server.on("connection", function(socket){
                 case "set":
                     if (bytesAndDataBlockMatches(parameters[4], infoClean)){
                         if (parameters.length === 5){
-                            sendToClient(memcached.set(parameters[0], parameters[2], parameters[3], parameters[4], infoClean));
+                            sendToClient(memcached.set(parameters[1], parameters[2], parameters[3], parameters[4], infoClean));
                         }
                         else if (parameters.length === 6){
                             sendToClient(memcached.set(parameters[1], parameters[2], parameters[3], parameters[4], infoClean, true));
@@ -47,7 +48,6 @@ server.on("connection", function(socket){
                     else {
                         socket.write("CLIENT_ERROR - Please make sure that the bytes and datablock size are the same\r\n");
                     }
-                    parameters = [];
 
                     break;
                 case "add":
@@ -62,7 +62,6 @@ server.on("connection", function(socket){
                     else {
                         socket.write("CLIENT_ERROR - Please make sure that the bytes and datablock size are the same\r\n");
                     }
-                    parameters = [];
 
                     break;
                 case "replace":
@@ -77,7 +76,6 @@ server.on("connection", function(socket){
                     else {
                         socket.write("CLIENT_ERROR - Please make sure that the bytes and datablock size are the same\r\n");
                     }
-                    parameters = [];
 
                     break;
                 case "prepend":
@@ -92,7 +90,6 @@ server.on("connection", function(socket){
                     else {
                         socket.write("CLIENT_ERROR - Please make sure that the bytes and datablock size are the same\r\n");
                     }
-                    parameters = [];
 
                     break;
                 case "append":
@@ -107,14 +104,13 @@ server.on("connection", function(socket){
                     else {
                         socket.write("CLIENT_ERROR - Please make sure that the bytes and datablock size are the same\r\n");
                     }
-                    parameters = [];
 
                     break;
                 case "cas":
                     console.log("Waiting to be developed");
                     break;
                 default:
-                    parameters = [];
+
                     break;
             }
         }
