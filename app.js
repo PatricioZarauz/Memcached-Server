@@ -129,10 +129,10 @@ server.on("connection", function(socket){
                 case "replace":
                 case "prepend":
                 case "append":
-                    if ((infoSeparated.length === 5) && (Number(infoSeparated[2]) <= 32767 && Number(infoSeparated[2]) >= -32767) && (Number(infoSeparated[3]) >= 0) && (Number(infoSeparated[4]) >= 0 && Number(infoSeparated[4]) <= 256) ){
+                    if ((infoSeparated.length === 5) && (Number.isInteger(Number(infoSeparated[2])) && Number(infoSeparated[2]) <= Math.pow(2,16)-1 && Number(infoSeparated[2]) >= 0) && (Number.isInteger(Number(infoSeparated[3]))) && (Number.isInteger(Number(infoSeparated[4])) && Number(infoSeparated[4]) >= 0 && Number(infoSeparated[4]) <= 256) ){
                         parametersConverter(infoSeparated, parameters)
                     }
-                    else if ((infoSeparated.length === 6) && (Number(infoSeparated[2]) <= 32767 && (infoSeparated[2]) >= -32767) && (Number(infoSeparated[3]) >= 0) && (Number(infoSeparated[4]) >= 0 && Number(infoSeparated[4]) <= 256) && (infoSeparated[5] === "noreply") ){
+                    else if ((infoSeparated.length === 6) && (Number.isInteger(Number(infoSeparated[2])) && Number(infoSeparated[2]) <= Math.pow(2,16)-1 && (infoSeparated[2]) >= 0) && (Number.isInteger(Number(infoSeparated[3]))) && (Number.isInteger(Number(infoSeparated[4])) && Number(infoSeparated[4]) >= 0 && Number(infoSeparated[4]) <= 256) && (infoSeparated[5] === "noreply") ){
                         parametersConverter(infoSeparated, parameters, true);
                     }
                     else {
@@ -145,10 +145,10 @@ server.on("connection", function(socket){
                     }
                     break;
                 case "cas":
-                    if ((infoSeparated.length === 6) && (infoSeparated[2] <= 32767 && infoSeparated[2] >= -32767) && (infoSeparated[3] >= 0) && (infoSeparated[4] >= 0 && infoSeparated[4] <= 256) && (infoSeparated[5] >= -9223372036854775808 && infoSeparated[5] <= 9223372036854775807) ){
+                    if ((infoSeparated.length === 6) && (Number.isInteger(Number(infoSeparated[2])) && Number(infoSeparated[2]) <= Math.pow(2,16)-1 && Number(infoSeparated[2]) >= 0) && (Number.isInteger(Number(infoSeparated[3]))) && (Number.isInteger(Number(infoSeparated[4])) && Number(infoSeparated[4]) >= 0 && Number(infoSeparated[4]) <= 256) && (Number.isInteger(Number(infoSeparated[5])) && Number(infoSeparated[5]) >= 0 && Number(infoSeparated[5]) <= Math.pow(2,64)-1) ){
                         parametersConverter(infoSeparated, parameters)
                     }
-                    else if ((infoSeparated.length === 7) && (infoSeparated[2] <= 32767 && infoSeparated[2] >= -32767) && (infoSeparated[3] >= 0) && (infoSeparated[4] >= 0 && infoSeparated[4] <= 256) && (infoSeparated[5] >= -9223372036854775808 && infoSeparated[5] <= 9223372036854775807) && (infoSeparated[6] === "noreply") ){
+                    else if ((infoSeparated.length === 7) && (Number.isInteger(Number(infoSeparated[2])) && Number(infoSeparated[2]) <= Math.pow(2,16)-1 && Number(infoSeparated[2]) >= 0) && (Number.isInteger(Number(infoSeparated[3])) ) && (Number.isInteger(Number(infoSeparated[4])) && Number(infoSeparated[4]) >= 0 && Number(infoSeparated[4]) <= 256) && (Number.isInteger(Number(infoSeparated[5])) && Number(infoSeparated[5]) >= 0 && Number(infoSeparated[5]) <= Math.pow(2,64)-1) && (infoSeparated[6] === "noreply") ){
                         parametersConverter(infoSeparated, parameters, true);
                     }
                     else {
