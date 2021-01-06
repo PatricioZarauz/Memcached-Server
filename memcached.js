@@ -21,7 +21,7 @@ class Memcached {
      * @param {Number} flags - The flags of the node to add to the memcached.
      * @param {Number} exptime - The expiration time of the node to add to the memcached, this is measured in seconds.
      * @param {Number} bytes - The byte of the node to add to the memcached.
-     * @param {string} noreply - The key of the node to add to the memcached.
+     * @param {Boolean} noreply - The key of the node to add to the memcached.
      * @param {string} datablock - The key of the node to add to the memcached.
      * @returns {string} - The result of setting the node.
      */
@@ -48,7 +48,7 @@ class Memcached {
      * @param {Number} flags - The flags of the node to add to the memcached.
      * @param {Number} exptime - The expiration time of the node to add to the memcached, this is measured in seconds.
      * @param {Number} bytes - The amount of bytes of the datablock of the node to add to the memcached.
-     * @param {string} noreply - A boolean flag that says if the client wants a reply of the operation
+     * @param {Boolean} noreply - A boolean flag that says if the client wants a reply of the operation
      * @param {string} datablock - The datablock of the node to add to the memcached.
      * @returns {string} - The result of setting the node.
      */
@@ -95,7 +95,7 @@ class Memcached {
      * @param {Number} flags - The flags of the node to replace to the memcached.
      * @param {Number} exptime - The expiration time of the node to update of the memcached, this is measured in seconds.
      * @param {Number} bytes - The amount of bytes of the datablock of the node to add to the memcached.
-     * @param {string} noreply - A boolean flag that says if the client wants a reply of the operation.
+     * @param {Boolean} noreply - A boolean flag that says if the client wants a reply of the operation.
      * @param {string} datablock - The datablock of the node to add to the memcached.
      * @returns {string} - The result of setting the node.
      */
@@ -122,7 +122,7 @@ class Memcached {
      * @param {Number} flags - The flags of the node to concatenate the datablock to.
      * @param {Number} exptime - The new expiration time of the node having it's datablock concatenated, this is measured in seconds.
      * @param {Number} bytes - The amount of bytes of the new datablock of the node to add to the memcached.
-     * @param {string} noreply - A boolean flag that says if the client wants a reply of the operation.
+     * @param {Boolean} noreply - A boolean flag that says if the client wants a reply of the operation.
      * @param {string} datablock - The datablock of the node to contatenate at the end of the original datablock stored in the memcached.
      * @returns {string} - The result if the node was updated or not.
      */
@@ -154,7 +154,7 @@ class Memcached {
      * @param {Number} flags - The flags of the node to concatenate the datablock to.
      * @param {Number} exptime - The new expiration time of the node having it's datablock concatenated, this is measured in seconds.
      * @param {Number} bytes - The amount of bytes of the new datablock of the node to add to the memcached.
-     * @param {string} noreply - A boolean flag that says if the client wants a reply of the operation.
+     * @param {Boolean} noreply - A boolean flag that says if the client wants a reply of the operation.
      * @param {string} datablock - The datablock of the node to contatenate at the begining of the original datablock stored in the memcached.
      * @returns {string} - The result if the node was updated or not.
      */
