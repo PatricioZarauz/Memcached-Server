@@ -68,6 +68,10 @@ class Memcached {
 
             this.cache.set(this.head.key, this.head);
 
+            if (this.head.exptime != 0){
+                this.head.timeOut = setTimeout(this.deleteNode, exptime * 1000, key, this);
+            }
+
             if (!noreply){
                 return "STORED\r\n";
             }
@@ -196,7 +200,7 @@ class Memcached {
 
     ensureLimit(){
         if (this.cache.size === this.limit){
-            this.remove(this.tail.key);
+            deleteNode(this.tail.key, this);
         }
     }
 
@@ -223,6 +227,46 @@ class Memcached {
             memcached.head = node;
         }
         memcached.cache.set(node.key, node);
+        if (node.exptime != 0){
+            node.timeOut = setTimeout(this.deleteNode, node.exptime * 1000,node.key, memcached);
+        }
+        else {
+            if (node.timeOut){
+                clearTimeout(node.timeOut);
+            }
+        }
+
+    }
+
+    /**
+     * Deletes the Node with the key given from the memcached.
+     * @param {Number} key - The key of the node that will be deleted.
+     * @param {Memcached} memcached - The memcached we are working on.
+     */
+    deleteNode(key, memcached){
+        var node = memcached.cache.get(key);
+        if (node){
+            if (node.prev != null){
+                node.prev.next = node.next;
+            }
+            else{
+                memcached.head = node.next;
+            }
+
+            if (node.next != null){
+                node.next.prev = node.prev;
+            }
+            else{
+                memcached.tail = node.prev;
+            }
+
+            if (node.timeOut){
+                clearTimeout(node.timeOut);
+            }
+
+            memcached.cache.delete(key);
+        }
+
     }
 }
 

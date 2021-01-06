@@ -15,6 +15,7 @@ class Node {
         this.exptime = exptime
         this.bytes = bytes
         this.datablock = datablock
+        this.timeOut = null
         this.next = next
         this.prev = prev
     }
