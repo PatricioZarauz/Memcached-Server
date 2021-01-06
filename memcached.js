@@ -68,7 +68,7 @@ class Memcached {
 
             this.cache.set(this.head.key, this.head);
 
-            if (this.head.exptime != 0){
+            if (this.head.exptime > 0){
                 this.head.timeOut = setTimeout(this.deleteNode, exptime * 1000, key, this);
             }
 
@@ -227,7 +227,7 @@ class Memcached {
             memcached.head = node;
         }
         memcached.cache.set(node.key, node);
-        if (node.exptime != 0){
+        if (node.exptime > 0){
             node.timeOut = setTimeout(this.deleteNode, node.exptime * 1000,node.key, memcached);
         }
         else {
