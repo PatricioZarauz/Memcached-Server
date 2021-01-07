@@ -5,6 +5,7 @@
  * @param {string} Node.exptime - The expiration time of the node.
  * @param {string} Node.bytes - The bytes of the node.
  * @param {string} Node.datablock - The datablock of the node.
+ * @param {Number} Node.timeout - The timeout id of the node.
  * @param {Node} Node.next - The following node, inorder to form an LRU.
  * @param {Node} Node.prev - The previous node, inorder to form an LRU.
  */
