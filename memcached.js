@@ -73,7 +73,7 @@ class Memcached {
             this.cache.set(this.head.key, this.head);
 
             if (this.head.exptime > 0){
-                this.head.timeOut = setTimeout(this.deleteNode, exptime * 1000, key);
+                this.head.timeOut = setTimeout(this.deleteNode, exptime * 1000, key, this);
             }
 
             if (noreply){
@@ -236,7 +236,7 @@ class Memcached {
 
             this.cache.set(node.key, node);
             if (node.exptime > 0){
-                node.timeOut = setTimeout(this.deleteNode, exptime * 1000, key);
+                node.timeOut = setTimeout(this.deleteNode, exptime * 1000, key, this);
             }
             else if (node.exptime === 0){
                 if (node.timeOut != null){
@@ -258,10 +258,11 @@ class Memcached {
     /**
      * Deletes the Node with the key given from the memcached.
      * @param {Number} key - The key of the node that will be deleted.
+     * @param {Memcached} memcached - The memcached we are working on.
      * @returns {Boolean} - It returns whether if the node was deleted or not.
      */
-    deleteNode(key){
-        const node = this.cache.get(key);
+    deleteNode(key, memcached = this){
+        const node = memcached.cache.get(key);
         if (node != null){
             if (node.prev != null){
                 node.prev.next = node.next;
