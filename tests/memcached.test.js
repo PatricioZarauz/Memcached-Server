@@ -1,4 +1,3 @@
-const { TestScheduler } = require('jest');
 const Memcached = require('../memcached');
 
 test('Add a node when the memcached is empty', () =>{
@@ -97,38 +96,6 @@ test('Replace a node that\'s in the memcached', () =>{
     expect("hola").toEqual(memcached.head.key);
 })
 
-test('Replace a node that\'s the tail of the memcached LRU', () =>{
-    const memcached = new Memcached();
-
-    memcached.add("last", 15, 0, 4, "LAST");
-    memcached.add("hola", 15, 0, 4, "HOLA");
-
-    expect(memcached.replace("last", 15, 0, 5, "FIRST")).toEqual("STORED\r\n");
-
-
-    expect(2).toEqual(memcached.cache.size);
-    expect("last").toEqual(memcached.head.key);
-    expect("FIRST").toEqual(memcached.head.datablock);
-})
-
-test('Replace a node that\'s in the middle of the memcached LRU', () =>{
-    const memcached = new Memcached();
-
-    memcached.add("last", 15, 0, 4, "LAST");
-    memcached.add("mid", 14, 0, 6, "MIDDLE");
-    memcached.add("first", 14, 0, 5, "FIRST");
-
-    expect(memcached.replace("mid", 15, 0, 4, "HOLA")).toEqual("STORED\r\n");
-
-
-    expect(memcached.cache.size).toEqual(3);
-    expect(memcached.head.key).toEqual("mid");
-    expect(memcached.head.datablock).toEqual("HOLA");
-    expect(memcached.head.next.key).toEqual("first");
-    expect(memcached.tail.key).toEqual("last");
-    expect(memcached.tail.prev.key).toEqual("first");
-})
-
 test('Replace a node when the memcached is empty, with noreply', () =>{
     const memcached = new Memcached();
 
@@ -159,38 +126,6 @@ test('Replace a node that\'s in the memcached, with noreply', () =>{
 
     expect(1).toEqual(memcached.cache.size);
     expect("hola").toEqual(memcached.head.key);
-})
-
-test('Replace a node that\'s the tail of the memcached LRU, with noreply', () =>{
-    const memcached = new Memcached();
-
-    memcached.add("last", 15, 0, 4, "LAST");
-    memcached.add("hola", 15, 0, 4, "HOLA");
-
-    expect(memcached.replace("last", 15, 0, 5, "FIRST", true)).toEqual(null);
-
-
-    expect(2).toEqual(memcached.cache.size);
-    expect("last").toEqual(memcached.head.key);
-    expect("FIRST").toEqual(memcached.head.datablock);
-})
-
-test('Replace a node that\'s in the middle of the memcached LRU, with noreply', () =>{
-    const memcached = new Memcached();
-
-    memcached.add("last", 15, 0, 4, "LAST");
-    memcached.add("mid", 14, 0, 6, "MIDDLE");
-    memcached.add("first", 14, 0, 5, "FIRST");
-
-    expect(memcached.replace("mid", 15, 0, 4, "HOLA", true)).toEqual(null);
-
-
-    expect(memcached.cache.size).toEqual(3);
-    expect(memcached.head.key).toEqual("mid");
-    expect(memcached.head.datablock).toEqual("HOLA");
-    expect(memcached.head.next.key).toEqual("first");
-    expect(memcached.tail.key).toEqual("last");
-    expect(memcached.tail.prev.key).toEqual("first");
 })
 
 test('Append a string to a node with an empty memcached', () =>{
@@ -433,4 +368,66 @@ test('Set a node when the memcached has nodes, but doesn\'t contains the desired
     expect(memcached.cache.size).toEqual(2);
     expect(memcached.head.key).toEqual("last");
     expect(memcached.head.datablock).toEqual("LAST");
+})
+
+test('Update a node when the memcached only contains that node', () =>{
+    const memcached = new Memcached();
+
+    memcached.add("hola", 15, 0, 4, "HOLA");
+    expect(memcached.updateNode("hola", 15, 0, 4, "CHAU")).toEqual(true);
+
+    expect(memcached.cache.size).toEqual(1);
+    expect(memcached.head.key).toEqual("hola");
+    expect(memcached.head.datablock).toEqual("CHAU");
+})
+
+test('Update a node when the memcached doesn\'t contains it, but it isn\'t empty', () =>{
+    const memcached = new Memcached();
+
+    memcached.add("last", 15, 0, 4, "LAST");
+    expect(memcached.updateNode("hola", 15, 0, 4, "CHAU")).toEqual(false);
+
+    expect(memcached.cache.size).toEqual(1);
+    expect("last").toEqual(memcached.head.key);
+    expect("LAST").toEqual(memcached.head.datablock);
+})
+
+test('Update a node when the memcached is empty', () =>{
+    const memcached = new Memcached();
+
+    expect(memcached.updateNode("hola", 15, 0, 4, "CHAU")).toEqual(false);
+
+    expect(memcached.cache.size).toEqual(0);
+})
+
+test('Update a node that\'s in the middle of the memcached LRU', () =>{
+    const memcached = new Memcached();
+
+    memcached.add("last", 15, 0, 4, "LAST");
+    memcached.add("mid", 14, 0, 6, "MIDDLE");
+    memcached.add("first", 14, 0, 5, "FIRST");
+
+    expect(memcached.updateNode("mid", 15, 0, 4, "HOLA")).toEqual(true);
+
+
+    expect(memcached.cache.size).toEqual(3);
+    expect(memcached.head.key).toEqual("mid");
+    expect(memcached.head.datablock).toEqual("HOLA");
+    expect(memcached.head.next.key).toEqual("first");
+    expect(memcached.tail.key).toEqual("last");
+    expect(memcached.tail.prev.key).toEqual("first");
+})
+
+test('Update a node that\'s the tail of the memcached LRU', () =>{
+    const memcached = new Memcached();
+
+    memcached.add("last", 15, 0, 4, "LAST");
+    memcached.add("hola", 15, 0, 4, "HOLA");
+
+    expect(memcached.updateNode("last", 15, 0, 5, "FIRST")).toEqual(true);
+
+
+    expect(2).toEqual(memcached.cache.size);
+    expect("last").toEqual(memcached.head.key);
+    expect("FIRST").toEqual(memcached.head.datablock);
 })
