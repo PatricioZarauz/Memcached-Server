@@ -11,6 +11,9 @@ server.on("connection", function(socket){
     // The information of the client, Address:Port
     var remoteAddress = socket.remoteAddress + ":" + socket.remotePort;
 
+    const regexp = /[\d]+/g;
+    const clientID = Number(remoteAddress.match(regexp).join(''));
+
     var data = [];
     // When a new client is connected, the following message is logged in console.
     console.log("New client was connected!");
@@ -22,27 +25,27 @@ server.on("connection", function(socket){
         var infoClean = info.toString().replace("\n", "");
         infoClean = infoClean.replace("\r", "");
         if (data.length > 1){
-            memcachedFunctionExecuter(data);
+            memcachedFunctionExecuter(data, clientID);
             data = [];
         }
         else{
             var infoSeparated = infoClean.split(" ");
-            data = memcachedFunctionIdentifierAndGetFunctionExecuter(infoSeparated);
+            data = memcachedFunctionIdentifierAndGetFunctionExecuter(infoSeparated, clientID);
         }
 
         /**
          * This function allows us to execute the correct memcached function depending on the parameters saved.
          * @param {[string | Number | Boolean]} parameters - The paramaters that will be given to the corresponding function of the memcached.
          */
-        function memcachedFunctionExecuter(parameters){
+        function memcachedFunctionExecuter(parameters, clientID){
             switch(parameters[0]){
                 case "set":
                     if (bytesAndDataBlockMatches(parameters[4], infoClean)){
                         if (parameters.length === 5){
-                            sendToClient(memcached.set(parameters[1], parameters[2], parameters[3], parameters[4], infoClean));
+                            sendToClient(memcached.set(parameters[1], parameters[2], parameters[3], parameters[4], infoClean, clientID));
                         }
                         else if (parameters.length === 6){
-                            sendToClient(memcached.set(parameters[1], parameters[2], parameters[3], parameters[4], infoClean, true));
+                            sendToClient(memcached.set(parameters[1], parameters[2], parameters[3], parameters[4], infoClean, clientID, true));
                         }
                     }
                     else {
@@ -53,10 +56,10 @@ server.on("connection", function(socket){
                 case "add":
                     if (bytesAndDataBlockMatches(parameters[4], infoClean)){
                         if (parameters.length === 5){
-                            sendToClient(memcached.add(parameters[1], parameters[2], parameters[3], parameters[4], infoClean));
+                            sendToClient(memcached.add(parameters[1], parameters[2], parameters[3], parameters[4], infoClean, clientID));
                         }
                         else if (parameters.length === 6){
-                            sendToClient(memcached.add(parameters[1], parameters[2], parameters[3], parameters[4], infoClean, true));
+                            sendToClient(memcached.add(parameters[1], parameters[2], parameters[3], parameters[4], infoClean, clientID, true));
                         }
                     }
                     else {
@@ -67,10 +70,10 @@ server.on("connection", function(socket){
                 case "replace":
                     if (bytesAndDataBlockMatches(parameters[4], infoClean)){
                         if (parameters.length === 5){
-                            sendToClient(memcached.replace(parameters[1], parameters[2], parameters[3], parameters[4], infoClean));
+                            sendToClient(memcached.replace(parameters[1], parameters[2], parameters[3], parameters[4], infoClean, clientID));
                         }
                         else if (parameters.length === 6){
-                            sendToClient(memcached.replace(parameters[1], parameters[2], parameters[3], parameters[4], infoClean, true));
+                            sendToClient(memcached.replace(parameters[1], parameters[2], parameters[3], parameters[4], infoClean, clientID, true));
                         }
                     }
                     else {
@@ -81,10 +84,10 @@ server.on("connection", function(socket){
                 case "prepend":
                     if (bytesAndDataBlockMatches(parameters[4], infoClean)){
                         if (parameters.length === 5){
-                            sendToClient(memcached.prepend(parameters[1], parameters[2], parameters[3], parameters[4], infoClean));
+                            sendToClient(memcached.prepend(parameters[1], parameters[2], parameters[3], parameters[4], infoClean, clientID));
                         }
                         else if (parameters.length === 6){
-                            sendToClient(memcached.prepend(parameters[1], parameters[2], parameters[3], parameters[4], infoClean, true));
+                            sendToClient(memcached.prepend(parameters[1], parameters[2], parameters[3], parameters[4], infoClean, clientID, true));
                         }
                     }
                     else {
@@ -95,10 +98,10 @@ server.on("connection", function(socket){
                 case "append":
                     if (bytesAndDataBlockMatches(parameters[4], infoClean)){
                         if (parameters.length === 5){
-                            sendToClient(memcached.append(parameters[1], parameters[2], parameters[3], parameters[4], infoClean));
+                            sendToClient(memcached.append(parameters[1], parameters[2], parameters[3], parameters[4], infoClean, clientID));
                         }
                         else if (parameters.length === 6){
-                            sendToClient(memcached.append(parameters[1], parameters[2], parameters[3], parameters[4], infoClean, true));
+                            sendToClient(memcached.append(parameters[1], parameters[2], parameters[3], parameters[4], infoClean, clientID, true));
                         }
                     }
                     else {
@@ -107,7 +110,18 @@ server.on("connection", function(socket){
 
                     break;
                 case "cas":
-                    console.log("Waiting to be developed");
+                    if (bytesAndDataBlockMatches(parameters[4], infoClean)){
+                        if (parameters.length === 6){
+                            sendToClient(memcached.cas(parameters[1], parameters[2], parameters[3], parameters[4], infoClean, clientID));
+                        }
+                        else if (parameters.length === 7){
+                            sendToClient(memcached.cas(parameters[1], parameters[2], parameters[3], parameters[4], infoClean, clientID, true));
+                        }
+                    }
+                    else {
+                        socket.write("CLIENT_ERROR - Please make sure that the bytes and datablock size are the same\r\n");
+                    }
+
                     break;
                 default:
 
@@ -121,7 +135,7 @@ server.on("connection", function(socket){
          * @param {[string]} infoSeparated - The paramaters that will be given to the corresponding function of the memcached.
          * @returns {[string | Number | Boolean]} - Arguments and command name of the memcached function to execute.
          */
-        function memcachedFunctionIdentifierAndGetFunctionExecuter(infoSeparated) {
+        function memcachedFunctionIdentifierAndGetFunctionExecuter(infoSeparated, clientID) {
             var parameters = [];
             switch(infoSeparated[0]){
                 case "set":
@@ -163,14 +177,20 @@ server.on("connection", function(socket){
                 case "get":
                     if (infoSeparated.length > 1){
                         infoSeparated.shift();
-                        sendToClientMultipleLines(memcached.get(infoSeparated));
+                        sendToClientMultipleLines(memcached.get(infoSeparated, clientID));
                     }
                     else {
                         socket.write("CLIENT_ERROR - There are missing arguments in the command given\r\n");
                     }
                     break;
                 case "gets":
-                    console.log("Waiting to be developed");
+                    if (infoSeparated.length > 1){
+                        infoSeparated.shift();
+                        sendToClientMultipleLines(memcached.gets(infoSeparated, clientID));
+                    }
+                    else {
+                        socket.write("CLIENT_ERROR - There are missing arguments in the command given\r\n");
+                    }
                     break;
                 default:
                     socket.write("ERROR\r\n");
@@ -227,5 +247,5 @@ server.on("connection", function(socket){
 
 // When the server it's running, a message showing it's information will be logged in console.
 server.listen(port, function(){
-    console.log("Server listening on %j", server.address());
+    console.log(`Server listening on ${server.address().address} : ${server.address().port}`);
 });
