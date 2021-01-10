@@ -8,7 +8,7 @@ const RBT = require("./rbt");
  * @param {string} Node.bytes - The bytes of the node.
  * @param {string} Node.datablock - The datablock of the node.
  * @param {Number} Node.timeout - The timeout id of the node.
- * @param {nodeRBT} Node.users - A tree of users that visited or last modified the node.
+ * @param {NodeRBT} Node.users - A tree of users that visited or last modified the node.
  * @param {Node} Node.next - The following node, inorder to form an LRU.
  * @param {Node} Node.prev - The previous node, inorder to form an LRU.
  */
