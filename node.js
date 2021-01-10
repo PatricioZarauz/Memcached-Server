@@ -1,5 +1,5 @@
-const NodeRBT = require('./nodeRBT');
-const RBT = require('./rbt');
+const NodeRBT = require("./nodeRBT");
+const RBT = require("./rbt");
 /**
  * Node is the class being stored as the value in the memcached cache.
  * @param {string} Node.key - The key of the node.
@@ -13,20 +13,29 @@ const RBT = require('./rbt');
  * @param {Node} Node.prev - The previous node, inorder to form an LRU.
  */
 class Node {
-    constructor (key, flags, exptime, bytes, datablock, user, next= null, prev=null){
-        this.key = key
-        this.flags = flags
-        this.exptime = exptime
-        this.bytes = bytes
-        this.datablock = datablock
-        this.timeOut = null
+	constructor(
+		key,
+		flags,
+		exptime,
+		bytes,
+		datablock,
+		user,
+		next = null,
+		prev = null
+	) {
+		this.key = key;
+		this.flags = flags;
+		this.exptime = exptime;
+		this.bytes = bytes;
+		this.datablock = datablock;
+		this.timeOut = null;
 
-        this.users = new RBT()
-        this.users.add(user, true)
+		this.users = new RBT();
+		this.users.add(user, true);
 
-        this.next = next
-        this.prev = prev
-    }
+		this.next = next;
+		this.prev = prev;
+	}
 }
 
 module.exports = Node;
