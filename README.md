@@ -21,11 +21,11 @@ $ npm install -d
 $ node app
 ```
 
-Now we have the server running, to terminate it, just close the console or press ctrl + c on the keyboard.
+Now, we have the server running; to terminate it, just close the console or press ctrl + c on the keyboard.
 
 For the client side, please install [NCat](https://nmap.org/ncat/) to connect to the Memcached server without any issues.
 
-To start the client just execute the following command...
+To start the client, just execute the following command...
 
 ```sh
 $ ncat 127.0.0.1 9000
@@ -96,7 +96,7 @@ $ <data block>
 
 -   cas
 
-It should be used after the gets command inorder to know the cas unique of the item.
+It should be used after the gets command, inorder to know the `<cas unique>` of the item.
 
 ```sh
 $ cas <key> <flags> <exptime> <bytes> <cas unique> [noreply]
@@ -105,16 +105,16 @@ $ <data block>
 
 `<key>` is a string separated by white space.<br/>
 `<flags>` is an arbitrary 16-bit unsigned integer.<br/>
-`<exptime>` is the expiration time of the item, measured in seconds.<br/>
+`<exptime>` is the expiration time of the item, measured in seconds. After the expiration time is reached, the item will be automatically removed from the memcached.<br/>
 `<bytes>` is the number of bytes in the data block to follow.<br/>
 `<cas unique>` is a unique 64-bit value of an existing entry. In the server, the cas unique is composed of the ip address and port number of the client.<br/>
 `<data block>` is a string, with an 8-bit data of length<br/>
 
-Please note that in order to not display a replay message [noreply] should be replaced by writing: "noreply" without quotations.
+Please note, in order to not display a replay message `[noreply]` should be replaced by writing: "noreply" without quotations.
 
 ### Test Cases
 
-In order to run the test cases implemented, the following command needs to be executed
+In order to run the implemented test cases, the following command needs to be executed
 
 ```sh
 $ npm test
