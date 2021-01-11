@@ -33,11 +33,9 @@ As this is a local server, the ip address will be 127.0.0.1
 
 ### Commands accepted by the server
 
-Retrieval commands:
-: &nbsp;
-Each <key> is a string separated by white space
+##### Retrieval commands:
 
-&nbsp;
+Each <key> is a string separated by white space
 
 -   get
 
@@ -51,8 +49,8 @@ $ get <key1> <key2> <key3> ... <keyn>
 $ gets <key1> <key2> <key3> ... <keyn>
 ```
 
-Storage commands:
-: &nbsp;
+##### Storage commands:
+
 <key> is a string separated by white space.
 <flags> is an arbitrary 16-bit unsigned integer.
 <exptime> is the expiration time of the item, measured in seconds.
