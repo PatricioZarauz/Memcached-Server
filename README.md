@@ -51,12 +51,12 @@ $ gets <key1> <key2> <key3> ... <keyn>
 
 ##### Storage commands:
 
-`<key>` is a string separated by white space.
-`<flags>` is an arbitrary 16-bit unsigned integer.
-`<exptime>` is the expiration time of the item, measured in seconds.
-`<bytes>` is the number of bytes in the data block to follow.
-`<cas unique>` is a unique 64-bit value of an existing entry. In the server, the cas unique is composed of the ip address and port number of the client.
-`<data block>` is a string, with an 8-bit data of length
+`<key>` is a string separated by white space.<br/>
+`<flags>` is an arbitrary 16-bit unsigned integer.<br/>
+`<exptime>` is the expiration time of the item, measured in seconds.<br/>
+`<bytes>` is the number of bytes in the data block to follow.<br/>
+`<cas unique>` is a unique 64-bit value of an existing entry. In the server, the cas unique is composed of the ip address and port number of the client.<br/>
+`<data block>` is a string, with an 8-bit data of length<br/>
 
 Please note that in order to not display a replay message [noreply] should be replaced by writing: "noreply" without quotations.
 
