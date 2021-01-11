@@ -25,17 +25,23 @@ Now we have the server running, to terminate it, just close the console or press
 
 For the client side, please install [NCat](https://nmap.org/ncat/) to connect to the Memcached server without any issues.
 
+To start the client just execute the following command...
+
 ```sh
 $ ncat 127.0.0.1 9000
 ```
 
 As this is a local server, the ip address will be 127.0.0.1
 
+### Demo client
+
+![](demo.gif)
+
+Please note, that in order to terminate a client connection, just close the console or press ctrl + c on the keyboard.
+
 ### Commands accepted by the server
 
 ##### Retrieval commands:
-
-Each `<key>` is a string separated by white space
 
 -   get
 
@@ -49,16 +55,9 @@ $ get <key1> <key2> <key3> ... <keyn>
 $ gets <key1> <key2> <key3> ... <keyn>
 ```
 
+Each `<key>` is a string separated by white space
+
 ##### Storage commands:
-
-`<key>` is a string separated by white space.<br/>
-`<flags>` is an arbitrary 16-bit unsigned integer.<br/>
-`<exptime>` is the expiration time of the item, measured in seconds.<br/>
-`<bytes>` is the number of bytes in the data block to follow.<br/>
-`<cas unique>` is a unique 64-bit value of an existing entry. In the server, the cas unique is composed of the ip address and port number of the client.<br/>
-`<data block>` is a string, with an 8-bit data of length<br/>
-
-Please note that in order to not display a replay message [noreply] should be replaced by writing: "noreply" without quotations.
 
 -   set
 
@@ -97,12 +96,21 @@ $ <data block>
 
 -   cas
 
+It should be used after the gets command inorder to know the cas unique of the item.
+
 ```sh
 $ cas <key> <flags> <exptime> <bytes> <cas unique> [noreply]
 $ <data block>
 ```
 
-It should be used after the gets command inorder to know the cas unique of the item.
+`<key>` is a string separated by white space.<br/>
+`<flags>` is an arbitrary 16-bit unsigned integer.<br/>
+`<exptime>` is the expiration time of the item, measured in seconds.<br/>
+`<bytes>` is the number of bytes in the data block to follow.<br/>
+`<cas unique>` is a unique 64-bit value of an existing entry. In the server, the cas unique is composed of the ip address and port number of the client.<br/>
+`<data block>` is a string, with an 8-bit data of length<br/>
+
+Please note that in order to not display a replay message [noreply] should be replaced by writing: "noreply" without quotations.
 
 ### Test Cases
 
