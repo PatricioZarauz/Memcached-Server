@@ -6,23 +6,31 @@ const port = 9000;
 
 var memcached = new Memcached();
 
+//When someone connects to the server this event will be executed
 server.on("connection", function (socket) {
 	// The information of the client, Address:Port
 	var remoteAddress = socket.remoteAddress + ":" + socket.remotePort;
 
+	//Saves only the numbers that make the remoteAddress, in the clientID constant.
 	const regexp = /[\d]+/g;
 	const clientID = Number(remoteAddress.match(regexp).join(""));
 
+	//Where the information recevied from the client will be stored, each argument will have it's
+	//own position the array.
 	var data = [];
+
 	// When a new client is connected, the following message is logged in console.
 	console.log("New client was connected!");
 
 	// When a new client is connected, the following message will appear in their console.
 	socket.write("Welcome to Patricio's Memcached-Server!\n");
 
+	//When the client sends data over (through the <info> parameter) to the server, this event will be executed.
 	socket.on("data", function (info) {
 		var infoClean = info.toString().replace("\n", "");
 		infoClean = infoClean.replace("\r", "");
+
+		//Asking if the client has already send parameters over.
 		if (data.length > 1) {
 			memcachedFunctionExecuter(data, clientID);
 			data = [];
@@ -35,8 +43,11 @@ server.on("connection", function (socket) {
 		}
 
 		/**
-		 * This function allows us to execute the correct memcached function depending on the parameters saved.
-		 * @param {[string | Number | Boolean]} parameters - The paramaters that will be given to the corresponding function of the memcached.
+		 * This function allows us to execute the correct memcached function depending on the
+		 * parameters saved.
+		 * @param {[string | Number | Boolean]} parameters - The paramaters that will be given
+		 * to the corresponding function of the memcached.
+		 * @param {Number} clientID - The number that uniquely identifies the client
 		 */
 		function memcachedFunctionExecuter(parameters, clientID) {
 			switch (parameters[0]) {
@@ -67,7 +78,7 @@ server.on("connection", function (socket) {
 							);
 						}
 					} else {
-						socket.write(
+						sendToClient(
 							"CLIENT_ERROR - Please make sure that the bytes and datablock size are the same\r\n"
 						);
 					}
@@ -100,7 +111,7 @@ server.on("connection", function (socket) {
 							);
 						}
 					} else {
-						socket.write(
+						sendToClient(
 							"CLIENT_ERROR - Please make sure that the bytes and datablock size are the same\r\n"
 						);
 					}
@@ -133,7 +144,7 @@ server.on("connection", function (socket) {
 							);
 						}
 					} else {
-						socket.write(
+						sendToClient(
 							"CLIENT_ERROR - Please make sure that the bytes and datablock size are the same\r\n"
 						);
 					}
@@ -166,7 +177,7 @@ server.on("connection", function (socket) {
 							);
 						}
 					} else {
-						socket.write(
+						sendToClient(
 							"CLIENT_ERROR - Please make sure that the bytes and datablock size are the same\r\n"
 						);
 					}
@@ -199,7 +210,7 @@ server.on("connection", function (socket) {
 							);
 						}
 					} else {
-						socket.write(
+						sendToClient(
 							"CLIENT_ERROR - Please make sure that the bytes and datablock size are the same\r\n"
 						);
 					}
@@ -232,7 +243,7 @@ server.on("connection", function (socket) {
 							);
 						}
 					} else {
-						socket.write(
+						sendToClient(
 							"CLIENT_ERROR - Please make sure that the bytes and datablock size are the same\r\n"
 						);
 					}
@@ -242,12 +253,18 @@ server.on("connection", function (socket) {
 					break;
 			}
 		}
+
 		/**
-		 * This function allows us to verify that the command send over by the client, doesn't have any issues and if so it saves each argument
-		 * and the command name in <parameters>.
-		 * Also if the command sent over by the client is get(s) function the command will be verified and executed.
-		 * @param {[string]} infoSeparated - The paramaters that will be given to the corresponding function of the memcached.
-		 * @returns {[string | Number | Boolean]} - Arguments and command name of the memcached function to execute.
+		 * This function allows us to verify that the command sent over by the client, doesn't
+		 * have any issues and if so, it saves each argument and the command name in the
+		 * <parameters> variable.
+		 * Also if the command sent over by the client is get(s) function the command will be
+		 * verified and executed.
+		 * @param {[string]} infoSeparated - The paramaters that will be given to the
+		 * corresponding function of the memcached.
+		 * @param {Number} clientID - The number that uniquely identifies the client
+		 * @returns {[string | Number | Boolean]} - Arguments and command name of the memcached
+		 * function to execute.
 		 */
 		function memcachedFunctionIdentifierAndGetFunctionExecuter(
 			infoSeparated,
@@ -262,37 +279,30 @@ server.on("connection", function (socket) {
 				case "append":
 					if (
 						infoSeparated.length === 5 &&
-						Number.isInteger(Number(infoSeparated[2])) &&
-						Number(infoSeparated[2]) <= Math.pow(2, 16) - 1 &&
-						Number(infoSeparated[2]) >= 0 &&
+						is16BitUnsignedInteger(infoSeparated[2]) &&
 						Number.isInteger(Number(infoSeparated[3])) &&
-						Number.isInteger(Number(infoSeparated[4])) &&
-						Number(infoSeparated[4]) >= 0 &&
-						Number(infoSeparated[4]) <= 256
+						is8BitUnsignedInteger(infoSeparated[4])
 					) {
-						parametersConverter(infoSeparated, parameters);
+						argumentsConverter(infoSeparated, parameters);
 					} else if (
 						infoSeparated.length === 6 &&
-						Number.isInteger(Number(infoSeparated[2])) &&
-						Number(infoSeparated[2]) <= Math.pow(2, 16) - 1 &&
-						infoSeparated[2] >= 0 &&
+						is16BitUnsignedInteger(infoSeparated[2]) &&
 						Number.isInteger(Number(infoSeparated[3])) &&
-						Number.isInteger(Number(infoSeparated[4])) &&
-						Number(infoSeparated[4]) >= 0 &&
-						Number(infoSeparated[4]) <= 256 &&
+						is8BitUnsignedInteger(infoSeparated[4]) &&
 						infoSeparated[5] === "noreply"
 					) {
-						parametersConverter(infoSeparated, parameters, true);
+						argumentsConverter(infoSeparated, parameters, true);
 					} else {
-						if (
-							infoSeparated.length < 5 ||
-							infoSeparated.length > 6
-						) {
-							socket.write(
+						if (infoSeparated.length < 5) {
+							sendToClient(
 								"CLIENT_ERROR - There are missing arguments in the command given\r\n"
 							);
+						} else if (infoSeparated.length > 6) {
+							sendToClient(
+								"CLIENT_ERROR - There are too many arguments in the command given\r\n"
+							);
 						} else {
-							socket.write(
+							sendToClient(
 								"CLIENT_ERROR - Please make sure that the arguments conform to the protocol\r\n"
 							);
 						}
@@ -301,43 +311,32 @@ server.on("connection", function (socket) {
 				case "cas":
 					if (
 						infoSeparated.length === 6 &&
-						Number.isInteger(Number(infoSeparated[2])) &&
-						Number(infoSeparated[2]) <= Math.pow(2, 16) - 1 &&
-						Number(infoSeparated[2]) >= 0 &&
+						is16BitUnsignedInteger(infoSeparated[2]) &&
 						Number.isInteger(Number(infoSeparated[3])) &&
-						Number.isInteger(Number(infoSeparated[4])) &&
-						Number(infoSeparated[4]) >= 0 &&
-						Number(infoSeparated[4]) <= 256 &&
-						Number.isInteger(Number(infoSeparated[5])) &&
-						Number(infoSeparated[5]) >= 0 &&
-						Number(infoSeparated[5]) <= Math.pow(2, 64) - 1
+						is8BitUnsignedInteger(infoSeparated[4]) &&
+						is64BitUnsignedInteger(infoSeparated[5])
 					) {
-						parametersConverter(infoSeparated, parameters);
+						argumentsConverter(infoSeparated, parameters);
 					} else if (
 						infoSeparated.length === 7 &&
-						Number.isInteger(Number(infoSeparated[2])) &&
-						Number(infoSeparated[2]) <= Math.pow(2, 16) - 1 &&
-						Number(infoSeparated[2]) >= 0 &&
+						is16BitUnsignedInteger(infoSeparated[2]) &&
 						Number.isInteger(Number(infoSeparated[3])) &&
-						Number.isInteger(Number(infoSeparated[4])) &&
-						Number(infoSeparated[4]) >= 0 &&
-						Number(infoSeparated[4]) <= 256 &&
-						Number.isInteger(Number(infoSeparated[5])) &&
-						Number(infoSeparated[5]) >= 0 &&
-						Number(infoSeparated[5]) <= Math.pow(2, 64) - 1 &&
+						is8BitUnsignedInteger(infoSeparated[4]) &&
+						is64BitUnsignedInteger(infoSeparated[5]) &&
 						infoSeparated[6] === "noreply"
 					) {
-						parametersConverter(infoSeparated, parameters, true);
+						argumentsConverter(infoSeparated, parameters, true);
 					} else {
-						if (
-							infoSeparated.length < 6 ||
-							infoSeparated.length > 7
-						) {
-							socket.write(
+						if (infoSeparated.length < 6) {
+							sendToClient(
 								"CLIENT_ERROR - There are missing arguments in the command given\r\n"
 							);
+						} else if (infoSeparated.length > 7) {
+							sendToClient(
+								"CLIENT_ERROR - There are too many arguments in the command given\r\n"
+							);
 						} else {
-							socket.write(
+							sendToClient(
 								"CLIENT_ERROR - Please make sure that the arguments conform to the protocol\r\n"
 							);
 						}
@@ -350,7 +349,7 @@ server.on("connection", function (socket) {
 							memcached.get(infoSeparated, clientID)
 						);
 					} else {
-						socket.write(
+						sendToClient(
 							"CLIENT_ERROR - There are missing arguments in the command given\r\n"
 						);
 					}
@@ -362,45 +361,103 @@ server.on("connection", function (socket) {
 							memcached.gets(infoSeparated, clientID)
 						);
 					} else {
-						socket.write(
+						sendToClient(
 							"CLIENT_ERROR - There are missing arguments in the command given\r\n"
 						);
 					}
 					break;
 				default:
-					socket.write("ERROR\r\n");
+					sendToClient("ERROR\r\n");
 					break;
 			}
 			return parameters;
 		}
 
-		function sendToClient(result) {
-			if (result) {
-				socket.write(result);
+		/**
+		 * This function tells us if the string in question is a 16 bit unsigned integer
+		 * @param {string} data - The string which we are trying to determining if it's a 16 bit
+		 * unsigned integer.
+		 * @returns {Boolean} - The result of whether the string in questions is a 16 bit unsigned
+		 * integer or not.
+		 */
+		function is16BitUnsignedInteger(data) {
+			return (
+				Number.isInteger(Number(data)) &&
+				Number(data) <= Math.pow(2, 16) - 1 &&
+				Number(data) >= 0
+			);
+		}
+
+		/**
+		 * This function tells us if the string in question is a 8 bit unsigned integer
+		 * @param {string} data - The string which we are trying to determining if it's a 8 bit
+		 * unsigned integer.
+		 * @returns {Boolean} - The result of whether the string in questions is a 8 bit unsigned
+		 * integer or not.
+		 */
+		function is8BitUnsignedInteger(data) {
+			return (
+				Number.isInteger(Number(data)) &&
+				Number(data) <= Math.pow(2, 8) - 1 &&
+				Number(data) >= 0
+			);
+		}
+
+		/**
+		 * This function tells us if the string in question is a 64 bit unsigned integer
+		 * @param {string} data - The string which we are trying to determining if it's a 64 bit
+		 * unsigned integer.
+		 * @returns {Boolean} - The result of whether the string in questions is a 64 bit unsigned
+		 * integer or not.
+		 */
+		function is64BitUnsignedInteger(data) {
+			return (
+				Number.isInteger(Number(data)) &&
+				Number(data) <= Math.pow(2, 64) - 1 &&
+				Number(data) >= 0
+			);
+		}
+
+		/**
+		 * This function sends data to the client
+		 * @param {string} data - The data that will be send over to the client
+		 */
+		function sendToClient(data) {
+			if (data) {
+				socket.write(data);
 			}
 		}
 
-		function sendToClientMultipleLines(result) {
-			result.forEach((element) => {
+		/**
+		 * This function sends the data stored in the array over to the client
+		 * @param {[string]} data - The data that will be send over to the client
+		 */
+		function sendToClientMultipleLines(data) {
+			data.forEach((element) => {
 				socket.write(element);
 			});
 		}
 
-		function parametersConverter(
-			infoSeparated,
-			parameters,
-			noreply = false
-		) {
+		/**
+		 * This function converts the arguments from a string to their respective memcached
+		 * function type and saves them in <parameters>.
+		 * @param {[string]} arguments - The arguments to be converted
+		 * @param {[string | Number | Boolean]} parameters - Where the converted arguments
+		 * wil be stored.
+		 * @param {Boolean} noreply - It's a boolean flag that determines whether there's a noreply
+		 * argument.
+		 */
+		function argumentsConverter(arguments, parameters, noreply = false) {
 			for (
 				let i = 0;
-				(i < infoSeparated.length && !noreply) ||
-				(noreply && i < infoSeparated.length - 1);
+				(i < arguments.length && !noreply) ||
+				(noreply && i < arguments.length - 1);
 				i++
 			) {
 				if (i > 1) {
-					infoSeparated[i] = Number(infoSeparated[i]);
+					arguments[i] = Number(arguments[i]);
 				}
-				parameters.push(infoSeparated[i]);
+				parameters.push(arguments[i]);
 			}
 			if (noreply) {
 				parameters.push(true);
