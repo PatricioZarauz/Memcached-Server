@@ -1,17 +1,20 @@
 const Node = require("./node");
 
-/**
- * Memcached is the class responsable of storing all the Nodes.
- * @param {Number} Memcached.limit - The limit of Nodes to be stored.
- * @param {Node} Memcached.head - The last used node.
- * @param {Node} Memcached.tail - The least used node.
- * @param {Map<string, Node>} Memcached.cache - Where the Nodes are stored.
- */
 class Memcached {
+	/**
+	 * Memcached is the class responsable of storing all the Nodes.
+	 * @param {Number} limit - The limit of Nodes to be stored.
+	 * @param {Node} head - The last used node.
+	 * @param {Node} tail - The least used node.
+	 * @param {Map<String, Node>} cache - Where the Nodes are stored.
+	 */
 	constructor(limit = 100) {
 		this.limit = limit;
 		this.head = null;
 		this.tail = null;
+		/**
+		 * @type {Map<String, Node>} Where the Nodes are stored.
+		 */
 		this.cache = new Map();
 	}
 

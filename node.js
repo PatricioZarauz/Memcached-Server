@@ -1,18 +1,20 @@
 const NodeRBT = require("./nodeRBT");
 const RBT = require("./rbt");
-/**
- * Node is the class being stored as the value in the memcached cache.
- * @param {string} Node.key - The key of the node.
- * @param {string} Node.flags - The flags of the node.
- * @param {string} Node.exptime - The expiration time of the node.
- * @param {string} Node.bytes - The bytes of the node.
- * @param {string} Node.datablock - The datablock of the node.
- * @param {Number} Node.timeout - The timeout id of the node.
- * @param {NodeRBT} Node.users - A tree of users that visited or last modified the node.
- * @param {Node} Node.next - The following node, inorder to form an LRU.
- * @param {Node} Node.prev - The previous node, inorder to form an LRU.
- */
+
 class Node {
+	/**
+	 * Node is the class being stored as the value in the memcached cache.
+	 * @param {string} key - The key of the node.
+	 * @param {Number} flags - The flags of the node.
+	 * @param {Number} exptime - The expiration time of the node.
+	 * @param {Number} bytes - The bytes of the node.
+	 * @param {string} datablock - The datablock of the node.
+	 * @param {Number} timeout - The timeout id of the node.
+	 * @param {Number} user - The number that identifies the user that created the node.
+	 * @param {NodeRBT} users - A tree of users that visited or last modified the node.
+	 * @param {Node} next - The following node, inorder to form an LRU.
+	 * @param {Node} prev - The previous node, inorder to form an LRU.
+	 */
 	constructor(
 		key,
 		flags,

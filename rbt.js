@@ -1,19 +1,19 @@
 const NodeRBT = require("./nodeRBT");
 
-/**
- * RBT (Red Black Tree) is the structure responsable of storing and managing the users that last
- * visited or modified a memcached node.
- * @param {NodeRBT} RBT.root - The root node of the Red Black Tree.
- * @param {Number} RBT.size - The current size of the Red Black Tree.
- */
 class RBT {
+	/**
+	 * RBT (Red Black Tree) is the structure responsible of storing and managing the users that last
+	 * visited or modified a memcached node.
+	 * @param {NodeRBT} root - The root node of the Red Black Tree.
+	 * @param {Number} size - The current size of the Red Black Tree.
+	 */
 	constructor() {
 		this.root = null;
 		this.size = 0;
 	}
 
 	/**
-	 * This function determines wheter a NodeRBT is red or not.
+	 * This function determines whether a NodeRBT is red or not.
 	 * @param {NodeRBT} node - The node whose colour is in question.
 	 * @returns {Boolean} - Returns true if the node is red, otherwise returns false.
 	 */
@@ -135,7 +135,7 @@ class RBT {
 
 	/**
 	 * This function returns the node saved under the given key.
-	 * Please note, that this a private function which is recursive.
+	 * Please note, that this is a recursive private function.
 	 * @param {NodeRBT} node - The current node of the tree
 	 * @param {Number} key - The key of the node that's being looked for
 	 * @returns {NodeRBT} - Returns the node which was saved under the given key, if it's
