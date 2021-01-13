@@ -263,7 +263,7 @@ test("Prepend a string to a desired node in the memcached, with noreply", () => 
 test("Get the value and information of a desired node when the memcached is empty", () => {
 	const memcached = new Memcached();
 
-	expect(memcached.get(["hola"])).toEqual(["END\r\n"]);
+	expect(memcached.get(["hola"], 1)).toEqual(["END\r\n"]);
 
 	expect(memcached.cache.size).toEqual(0);
 	expect(memcached.head).toEqual(null);
@@ -275,7 +275,7 @@ test(
 	() => {
 		const memcached = new Memcached();
 
-		expect(memcached.get(["hola", "test"])).toEqual(["END\r\n"]);
+		expect(memcached.get(["hola", "test"], 1)).toEqual(["END\r\n"]);
 
 		expect(memcached.cache.size).toEqual(0);
 		expect(memcached.head).toEqual(null);
@@ -286,7 +286,7 @@ test("Get the value and information of a desired node, when the memcached contai
 	const memcached = new Memcached();
 
 	memcached.add("hola", 15, 0, 4, "LAST", 1);
-	expect(memcached.get(["hola"])).toEqual([
+	expect(memcached.get(["hola"], 1)).toEqual([
 		"VALUE hola 15 4\r\n",
 		"LAST\r\n",
 		"END\r\n",
@@ -300,7 +300,7 @@ test(
 		const memcached = new Memcached();
 
 		memcached.add("hola", 15, 0, 4, "LAST", 1);
-		expect(memcached.get(["hola", "test"])).toEqual([
+		expect(memcached.get(["hola", "test"], 1)).toEqual([
 			"VALUE hola 15 4\r\n",
 			"LAST\r\n",
 			"END\r\n",
@@ -316,7 +316,7 @@ test(
 
 		memcached.add("hola", 15, 0, 4, "HOLA", 1);
 		memcached.add("last", 16, 0, 4, "LAST", 1);
-		expect(memcached.get(["hola", "last"])).toEqual([
+		expect(memcached.get(["hola", "last"], 1)).toEqual([
 			"VALUE hola 15 4\r\n",
 			"HOLA\r\n",
 			"VALUE last 16 4\r\n",
@@ -487,7 +487,7 @@ test(
 			"END\r\n",
 		]);
 
-		expect(memcached.head.users.contains(1).key).toEqual(1);
+		expect(memcached.head.casIds.contains(1).key).toEqual(1);
 	}
 );
 
@@ -504,7 +504,7 @@ test(
 			"END\r\n",
 		]);
 
-		expect(memcached.head.users.contains(2).key).toEqual(2);
+		expect(memcached.head.casIds.contains(2).key).toEqual(2);
 	}
 );
 
@@ -521,7 +521,7 @@ test(
 			"END\r\n",
 		]);
 
-		expect(memcached.head.users.contains(1).key).toEqual(1);
+		expect(memcached.head.casIds.contains(1).key).toEqual(1);
 	}
 );
 
@@ -541,8 +541,8 @@ test(
 			"END\r\n",
 		]);
 
-		expect(memcached.head.users.contains(1).key).toEqual(1);
-		expect(memcached.tail.users.contains(1).key).toEqual(1);
+		expect(memcached.head.casIds.contains(1).key).toEqual(1);
+		expect(memcached.tail.casIds.contains(1).key).toEqual(1);
 	}
 );
 
@@ -615,7 +615,7 @@ test(
 		expect(memcached.cache.size).toEqual(1);
 		expect(memcached.head.key).toEqual("hola");
 		expect(memcached.head.datablock).toEqual("LAST");
-		expect(memcached.head.users.contains(1)).toEqual(null);
+		expect(memcached.head.casIds.contains(1)).toEqual(null);
 	}
 );
 
@@ -682,7 +682,7 @@ test(
 		expect(memcached.cache.size).toEqual(1);
 		expect(memcached.head.key).toEqual("hola");
 		expect(memcached.head.datablock).toEqual("LAST");
-		expect(memcached.head.users.contains(1)).toEqual(null);
+		expect(memcached.head.casIds.contains(1)).toEqual(null);
 	}
 );
 
