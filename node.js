@@ -4,14 +4,14 @@ const RBT = require("./rbt");
 class Node {
 	/**
 	 * Node is the class being stored as the value in the memcached cache.
-	 * @param {string} key - The key of the node.
-	 * @param {Number} flags - The flags of the node.
-	 * @param {Number} exptime - The expiration time of the node.
-	 * @param {Number} bytes - The bytes of the node.
-	 * @param {string} datablock - The datablock of the node.
-	 * @param {Number} timeout - The timeout id of the node.
-	 * @param {Number} user - The number that identifies the user that created the node.
-	 * @param {NodeRBT} users - A tree of users that visited or last modified the node.
+	 * @param {string} key - Key of the node.
+	 * @param {Number} flags - Flags of the node.
+	 * @param {Number} exptime - Expiration time of the node.
+	 * @param {Number} bytes - Bytes of the node.
+	 * @param {string} datablock - Datablock of the node.
+	 * @param {Number} timeout - Timeout id of the node.
+	 * @param {Number} casId - Number that identifies the user that created the node.
+	 * @param {NodeRBT} casIds - Tree of casIds of users that visited or last modified the node.
 	 * @param {Node} next - The following node, inorder to form an LRU.
 	 * @param {Node} prev - The previous node, inorder to form an LRU.
 	 */
@@ -21,7 +21,7 @@ class Node {
 		exptime,
 		bytes,
 		datablock,
-		user,
+		casId,
 		next = null,
 		prev = null
 	) {
@@ -32,8 +32,8 @@ class Node {
 		this.datablock = datablock;
 		this.timeOut = null;
 
-		this.users = new RBT();
-		this.users.add(user, true);
+		this.casIds = new RBT();
+		this.casIds.add(casId, true);
 
 		this.next = next;
 		this.prev = prev;
