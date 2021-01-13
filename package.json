@@ -1,6 +1,6 @@
 {
   "name": "Memcached-Server",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "description": "Memcached Server for the Moove-It coding challenges",
   "main": "app.js",
   "scripts": {
