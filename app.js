@@ -11,12 +11,12 @@ server.on("connection", function (socket) {
 	// The information of the client, Address:Port
 	var remoteAddress = socket.remoteAddress + ":" + socket.remotePort;
 
-	//Saves only the numbers that make the remoteAddress, in the clientID constant.
+	//Saves only the numbers that make the remoteAddress, in the casID constant.
 	const regexp = /[\d]+/g;
-	const clientID = Number(remoteAddress.match(regexp).join(""));
+	const casID = Number(remoteAddress.match(regexp).join(""));
 
-	//Where the information recevied from the client will be stored, each argument will have it's
-	//own position the array.
+	//Stores the information recevied from the client, each argument will have it's
+	//own position in the array.
 	var data = [];
 
 	// When a new client is connected, the following message is logged in console.
@@ -30,15 +30,15 @@ server.on("connection", function (socket) {
 		var infoClean = info.toString().replace("\n", "");
 		infoClean = infoClean.replace("\r", "");
 
-		//Asking if the client has already send parameters over.
+		//Asking if the client has already sent parameters over.
 		if (data.length > 1) {
-			memcachedFunctionExecuter(data, clientID);
+			memcachedFunctionExecuter(data, casID);
 			data = [];
 		} else {
 			var infoSeparated = infoClean.split(" ");
 			data = memcachedFunctionIdentifierAndGetFunctionExecuter(
 				infoSeparated,
-				clientID
+				casID
 			);
 		}
 
@@ -47,9 +47,9 @@ server.on("connection", function (socket) {
 		 * parameters saved.
 		 * @param {[string | Number | Boolean]} parameters - The paramaters that will be given
 		 * to the corresponding function of the memcached.
-		 * @param {Number} clientID - The number that uniquely identifies the client
+		 * @param {Number} casID - The number that uniquely identifies the client
 		 */
-		function memcachedFunctionExecuter(parameters, clientID) {
+		function memcachedFunctionExecuter(parameters, casID) {
 			switch (parameters[0]) {
 				case "set":
 					if (bytesAndDataBlockMatches(parameters[4], infoClean)) {
@@ -61,7 +61,7 @@ server.on("connection", function (socket) {
 									parameters[3],
 									parameters[4],
 									infoClean,
-									clientID
+									casID
 								)
 							);
 						} else if (parameters.length === 6) {
@@ -72,7 +72,7 @@ server.on("connection", function (socket) {
 									parameters[3],
 									parameters[4],
 									infoClean,
-									clientID,
+									casID,
 									true
 								)
 							);
@@ -94,7 +94,7 @@ server.on("connection", function (socket) {
 									parameters[3],
 									parameters[4],
 									infoClean,
-									clientID
+									casID
 								)
 							);
 						} else if (parameters.length === 6) {
@@ -105,7 +105,7 @@ server.on("connection", function (socket) {
 									parameters[3],
 									parameters[4],
 									infoClean,
-									clientID,
+									casID,
 									true
 								)
 							);
@@ -127,7 +127,7 @@ server.on("connection", function (socket) {
 									parameters[3],
 									parameters[4],
 									infoClean,
-									clientID
+									casID
 								)
 							);
 						} else if (parameters.length === 6) {
@@ -138,7 +138,7 @@ server.on("connection", function (socket) {
 									parameters[3],
 									parameters[4],
 									infoClean,
-									clientID,
+									casID,
 									true
 								)
 							);
@@ -160,7 +160,7 @@ server.on("connection", function (socket) {
 									parameters[3],
 									parameters[4],
 									infoClean,
-									clientID
+									casID
 								)
 							);
 						} else if (parameters.length === 6) {
@@ -171,7 +171,7 @@ server.on("connection", function (socket) {
 									parameters[3],
 									parameters[4],
 									infoClean,
-									clientID,
+									casID,
 									true
 								)
 							);
@@ -193,7 +193,7 @@ server.on("connection", function (socket) {
 									parameters[3],
 									parameters[4],
 									infoClean,
-									clientID
+									casID
 								)
 							);
 						} else if (parameters.length === 6) {
@@ -204,7 +204,7 @@ server.on("connection", function (socket) {
 									parameters[3],
 									parameters[4],
 									infoClean,
-									clientID,
+									casID,
 									true
 								)
 							);
@@ -226,7 +226,7 @@ server.on("connection", function (socket) {
 									parameters[3],
 									parameters[4],
 									infoClean,
-									clientID
+									casID
 								)
 							);
 						} else if (parameters.length === 7) {
@@ -237,7 +237,7 @@ server.on("connection", function (socket) {
 									parameters[3],
 									parameters[4],
 									infoClean,
-									clientID,
+									casID,
 									true
 								)
 							);
@@ -256,19 +256,19 @@ server.on("connection", function (socket) {
 
 		/**
 		 * This function allows us to verify that the command sent over by the client, doesn't
-		 * have any issues and if so, it saves each argument and the command name in the
+		 * have any issues; and if so, it saves each argument and the command name in the
 		 * <parameters> variable.
-		 * Also if the command sent over by the client is get(s) function the command will be
+		 * Also, if the command sent over by the client is the get(s) function, the command will be
 		 * verified and executed.
-		 * @param {[string]} infoSeparated - The paramaters that will be given to the
+		 * @param {[string]} infoSeparated - Paramaters that will be given to the
 		 * corresponding function of the memcached.
-		 * @param {Number} clientID - The number that uniquely identifies the client
+		 * @param {Number} casID - Number that uniquely identifies the client
 		 * @returns {[string | Number | Boolean]} - Arguments and command name of the memcached
 		 * function to execute.
 		 */
 		function memcachedFunctionIdentifierAndGetFunctionExecuter(
 			infoSeparated,
-			clientID
+			casID
 		) {
 			var parameters = [];
 			switch (infoSeparated[0]) {
@@ -346,7 +346,7 @@ server.on("connection", function (socket) {
 					if (infoSeparated.length > 1) {
 						infoSeparated.shift();
 						sendToClientMultipleLines(
-							memcached.get(infoSeparated, clientID)
+							memcached.get(infoSeparated, casID)
 						);
 					} else {
 						sendToClient(
@@ -358,7 +358,7 @@ server.on("connection", function (socket) {
 					if (infoSeparated.length > 1) {
 						infoSeparated.shift();
 						sendToClientMultipleLines(
-							memcached.gets(infoSeparated, clientID)
+							memcached.gets(infoSeparated, casID)
 						);
 					} else {
 						sendToClient(
@@ -375,7 +375,7 @@ server.on("connection", function (socket) {
 
 		/**
 		 * This function tells us if the string in question is a 16 bit unsigned integer
-		 * @param {string} data - The string which we are trying to determining if it's a 16 bit
+		 * @param {string} data - String which we are trying to determining if it's a 16 bit
 		 * unsigned integer.
 		 * @returns {Boolean} - The result of whether the string in questions is a 16 bit unsigned
 		 * integer or not.
@@ -390,9 +390,9 @@ server.on("connection", function (socket) {
 
 		/**
 		 * This function tells us if the string in question is a 8 bit unsigned integer
-		 * @param {string} data - The string which we are trying to determining if it's a 8 bit
+		 * @param {string} data - String which we are trying to determine if it's a 8 bit
 		 * unsigned integer.
-		 * @returns {Boolean} - The result of whether the string in questions is a 8 bit unsigned
+		 * @returns {Boolean} - Returns if the string in questions is a 8 bit unsigned
 		 * integer or not.
 		 */
 		function is8BitUnsignedInteger(data) {
@@ -405,9 +405,9 @@ server.on("connection", function (socket) {
 
 		/**
 		 * This function tells us if the string in question is a 64 bit unsigned integer
-		 * @param {string} data - The string which we are trying to determining if it's a 64 bit
+		 * @param {string} data - The string which we are trying to determine if it's a 64 bit
 		 * unsigned integer.
-		 * @returns {Boolean} - The result of whether the string in questions is a 64 bit unsigned
+		 * @returns {Boolean} - Returns if the string in questions is a 64 bit unsigned
 		 * integer or not.
 		 */
 		function is64BitUnsignedInteger(data) {
@@ -420,7 +420,7 @@ server.on("connection", function (socket) {
 
 		/**
 		 * This function sends data to the client
-		 * @param {string} data - The data that will be send over to the client
+		 * @param {string} data - The data that will be sent over to the client
 		 */
 		function sendToClient(data) {
 			if (data) {
@@ -430,7 +430,7 @@ server.on("connection", function (socket) {
 
 		/**
 		 * This function sends the data stored in the array over to the client
-		 * @param {[string]} data - The data that will be send over to the client
+		 * @param {[string]} data - Data that will be sent over to the client
 		 */
 		function sendToClientMultipleLines(data) {
 			data.forEach((element) => {
@@ -441,8 +441,8 @@ server.on("connection", function (socket) {
 		/**
 		 * This function converts the arguments from a string to their respective memcached
 		 * function type and saves them in <parameters>.
-		 * @param {[string]} arguments - The arguments to be converted
-		 * @param {[string | Number | Boolean]} parameters - Where the converted arguments
+		 * @param {[string]} arguments - Arguments to be converted
+		 * @param {[string | Number | Boolean]} parameters - It is where the converted arguments
 		 * wil be stored.
 		 * @param {Boolean} noreply - It's a boolean flag that determines whether there's a noreply
 		 * argument.
@@ -466,8 +466,8 @@ server.on("connection", function (socket) {
 
 		/**
 		 * This function tells us if the Bytes argument and DataBlock size matches.
-		 * @param {Number} bytes - The byte size of the datablock.
-		 * @param {string} dataBlock - The datablock sent by the client.
+		 * @param {Number} bytes - Byte size of the datablock.
+		 * @param {string} dataBlock - Datablock sent by the client.
 		 * @returns {Boolean} - Arguments and command name of the memcached function to execute.
 		 */
 		function bytesAndDataBlockMatches(bytes, dataBlock) {
@@ -475,7 +475,7 @@ server.on("connection", function (socket) {
 		}
 	});
 
-	//When the connection with a client is lost, a message is logged on console saying which connection was terminated.
+	//When the connection with a client is lost, a message is logged on console, saying which connection was terminated.
 	socket.once("close", function () {
 		console.log(`Connection from ${remoteAddress} was terminated`);
 	});
@@ -486,7 +486,7 @@ server.on("connection", function (socket) {
 	});
 });
 
-// When the server it's running, a message showing it's information will be logged in console.
+// When the server it's running, a message showing its information will be logged in console.
 server.listen(port, function () {
 	console.log(
 		`Server listening on ${server.address().address} : ${
