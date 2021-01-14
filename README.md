@@ -119,3 +119,7 @@ In order to run the implemented test cases, the following command needs to be ex
 ```sh
 $ npm test
 ```
+
+### Load Tests
+
+A JMeter load test was created. The load tested function was `get` since from my understanding it's the function that could potentially crash the memcached server.
