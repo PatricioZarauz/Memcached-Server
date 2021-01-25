@@ -1,3 +1,4 @@
+const Message = require("./message");
 const Node = require("./node");
 
 /**
@@ -22,14 +23,34 @@ class Memcached {
 	 * @param {Map<String, Node>} cache - It is where the Nodes are stored.
 	 */
 	constructor(limit = 100) {
-		this.limit = limit;
-		this.head = null;
-		this.tail = null;
+		Memcached.limit = limit;
+		Memcached.head = null;
+		Memcached.tail = null;
 		/**
 		 * @type {Map<String, Node>} It is where the Nodes are stored.
 		 */
-		this.cache = new Map();
+		Memcached.cache = new Map();
 	}
+
+	/**
+	 * @type {Number} The limit of Nodes to be stored, by default the limit is 100 items.
+	 */
+	static limit;
+
+	/**
+	 * @type {Node} Last used node.
+	 */
+	static head;
+
+	/**
+	 * @type {Node} Least used node.
+	 */
+	static tail;
+
+	/**
+	 * @type {Map<String, Node>} It is where the Nodes are stored.
+	 */
+	static cache;
 
 	/**
 	 * This function allows us to update or add a Node to the memcached.
@@ -44,15 +65,15 @@ class Memcached {
 	 * @param {Number} casId - Number that identifies the user that's setting the node.
 	 * @returns {string} - Reply message after setting the node.
 	 */
-	set(key, flags, exptime, bytes, datablock, casId, noreply = false) {
+	static set(key, flags, exptime, bytes, datablock, casId, noreply = false) {
 		if (
 			this.add(key, flags, exptime, bytes, datablock, casId, false) ===
-			"STORED\r\n"
+			Message.stored
 		) {
 			if (noreply) {
 				return null;
 			} else {
-				return "STORED\r\n";
+				return Message.stored;
 			}
 		} else {
 			return this.replace(
@@ -82,15 +103,15 @@ class Memcached {
 	 * @param {Number} casId - Number that identifies the user that's adding the node.
 	 * @returns {string} - Reply message after adding the node.
 	 */
-	add(key, flags, exptime, bytes, datablock, casId, noreply = false) {
+	static add(key, flags, exptime, bytes, datablock, casId, noreply = false) {
 		if (this.cache.get(key) != null || exptime < 0) {
 			if (noreply) {
 				return null;
 			} else {
-				return "NOT_STORED\r\n";
+				return Message.notStored;
 			}
 		} else {
-			this.ensureLimit();
+			ensureLimit();
 
 			if (this.head != null) {
 				const node = new Node(
@@ -118,18 +139,13 @@ class Memcached {
 			this.cache.set(this.head.key, this.head);
 
 			if (this.head.exptime > 0) {
-				this.head.timeOut = setTimeout(
-					this.deleteNode,
-					exptime * 1000,
-					key,
-					this
-				);
+				this.head.timeOut = setTimeout(deleteNode, exptime * 1000, key);
 			}
 
 			if (noreply) {
 				return null;
 			} else {
-				return "STORED\r\n";
+				return Message.stored;
 			}
 		}
 	}
@@ -148,18 +164,26 @@ class Memcached {
 	 * @param {Number} casId - Number that identifies the user that's replacing the node.
 	 * @returns {string} - Reply message after replacing the node.
 	 */
-	replace(key, flags, exptime, bytes, datablock, casId, noreply = false) {
-		if (this.updateNode(key, flags, exptime, bytes, datablock, casId)) {
+	static replace(
+		key,
+		flags,
+		exptime,
+		bytes,
+		datablock,
+		casId,
+		noreply = false
+	) {
+		if (updateNode(key, flags, exptime, bytes, datablock, casId)) {
 			if (noreply) {
 				return null;
 			} else {
-				return "STORED\r\n";
+				return Message.stored;
 			}
 		} else {
 			if (noreply) {
 				return null;
 			} else {
-				return "NOT_STORED\r\n";
+				return Message.notStored;
 			}
 		}
 	}
@@ -180,31 +204,31 @@ class Memcached {
 	 * @param {Number} casId - Number that identifies the user that's appending the node.
 	 * @returns {string} - Reply message after appending the datablock to the node.
 	 */
-	append(key, flags, exptime, bytes, datablock, casId, noreply = false) {
+	static append = (
+		key,
+		flags,
+		exptime,
+		bytes,
+		datablock,
+		casId,
+		noreply = false
+	) => {
 		if (
-			this.updateNode(
-				key,
-				flags,
-				exptime,
-				bytes,
-				datablock,
-				casId,
-				"append"
-			)
+			updateNode(key, flags, exptime, bytes, datablock, casId, "append")
 		) {
 			if (noreply) {
 				return null;
 			} else {
-				return "STORED\r\n";
+				return Message.stored;
 			}
 		} else {
 			if (noreply) {
 				return null;
 			} else {
-				return "NOT_STORED\r\n";
+				return Message.notStored;
 			}
 		}
-	}
+	};
 
 	/**
 	 * This function allows us to concatenate at the begining of the datablock of the desired node
@@ -222,31 +246,31 @@ class Memcached {
 	 * @param {Number} casId - Number that identifies the user that's prepending the node.
 	 * @returns {string} - Reply message after prepending the datablock to the node.
 	 */
-	prepend(key, flags, exptime, bytes, datablock, casId, noreply = false) {
+	static prepend = (
+		key,
+		flags,
+		exptime,
+		bytes,
+		datablock,
+		casId,
+		noreply = false
+	) => {
 		if (
-			this.updateNode(
-				key,
-				flags,
-				exptime,
-				bytes,
-				datablock,
-				casId,
-				"prepend"
-			)
+			updateNode(key, flags, exptime, bytes, datablock, casId, "prepend")
 		) {
 			if (noreply) {
 				return null;
 			} else {
-				return "STORED\r\n";
+				return Message.stored;
 			}
 		} else {
 			if (noreply) {
 				return null;
 			} else {
-				return "NOT_STORED\r\n";
+				return Message.notStored;
 			}
 		}
-	}
+	};
 
 	/**
 	 * This function allows us to set a Node only if it exists in the memcached and it wasn't
@@ -263,7 +287,15 @@ class Memcached {
 	 * @param {Number} casId - Number that identifies the user that's updating the node.
 	 * @returns {string} - Reply message after replacing the node.
 	 */
-	cas(key, flags, exptime, bytes, datablock, casId, noreply = false) {
+	static cas = (
+		key,
+		flags,
+		exptime,
+		bytes,
+		datablock,
+		casId,
+		noreply = false
+	) => {
 		const node = this.cache.get(key);
 		if (node != null) {
 			if (node.casIds.contains(casId) != null) {
@@ -280,17 +312,17 @@ class Memcached {
 				if (noreply) {
 					return null;
 				} else {
-					return "EXISTS\r\n";
+					return Message.exists;
 				}
 			}
 		} else {
 			if (noreply) {
 				return null;
 			} else {
-				return "NOT_FOUND\r\n";
+				return Message.notFound;
 			}
 		}
-	}
+	};
 
 	/**
 	 * This function allows us to retrieve the value of one or more keys stored in the memcached.
@@ -298,12 +330,12 @@ class Memcached {
 	 * @param {Number} casId - Number that identifies the user that's trying to read the node.
 	 * @returns {[string]} - Value(s) of the key(s) of retrieved node(s).
 	 */
-	get(keys, casId) {
+	static get = (keys, casId) => {
 		let results = [];
 		keys.forEach((key) => {
 			let node = this.cache.get(key);
 			if (node != null) {
-				this.reorganizeCache(node);
+				reorganizeCache(node);
 				node.casIds.add(casId, true);
 				this.cache.set(node.key, node);
 				results.push(
@@ -312,9 +344,9 @@ class Memcached {
 				results.push(`${node.datablock}\r\n`);
 			}
 		});
-		results.push("END\r\n");
+		results.push(Message.end);
 		return results;
-	}
+	};
 
 	/**
 	 * This function allows us to retrieve the value, with it's casId, of one or more keys stored
@@ -324,12 +356,12 @@ class Memcached {
 	 * @returns {[string]} - Value(s) of the key(s) of retrieved node(s), with their
 	 * respective casId.
 	 */
-	gets(keys, casId) {
+	static gets = (keys, casId) => {
 		let results = [];
 		keys.forEach((key) => {
 			let node = this.cache.get(key);
 			if (node != null) {
-				this.reorganizeCache(node);
+				reorganizeCache(node);
 				node.casIds.add(casId, true);
 				this.cache.set(node.key, node);
 				results.push(
@@ -338,132 +370,126 @@ class Memcached {
 				results.push(`${node.datablock}\r\n`);
 			}
 		});
-		results.push("END\r\n");
+		results.push(Message.end);
 		return results;
-	}
-
-	/**
-	 * This function makes sure that the limit of the memcached is being respected; if it's about
-	 * to be passed, it deletes the least used node of the memcached.
-	 */
-	ensureLimit() {
-		if (this.cache.size === this.limit) {
-			this.deleteNode(this.tail.key);
-		}
-	}
-
-	/**
-	 * Node which is passed through the arguments will be updated.
-	 * @param {string} key - Key of the node that will be updated.
-	 * @param {Number} flags - Updated flags of the node.
-	 * @param {Number} exptime - Updated expiration time of the node.
-	 * @param {Number} bytes - Updated bytes of the node.
-	 * @param {string} datablock - Updated datablock of the node.
-	 * @param {string} apOrPrePend - The string tells us if we need to append, prepend or if the
-	 * data just needs to be updated.
-	 * @param {Number} casId - Number that identifies the user that's updating the node.
-	 * @returns {Boolean} - It tells us if the node of the given key was updated or not.
-	 */
-	updateNode(
-		key,
-		flags,
-		exptime,
-		bytes,
-		datablock,
-		casId,
-		apOrPrePend = null
-	) {
-		const node = this.cache.get(key);
-		if (node != null) {
-			node.flags = flags;
-			if (apOrPrePend === "append") {
-				node.datablock = node.datablock + datablock;
-				node.bytes = node.bytes + bytes;
-			} else if (apOrPrePend === "prepend") {
-				node.datablock = datablock + node.datablock;
-				node.bytes = bytes + node.bytes;
-			} else {
-				node.datablock = datablock;
-				node.bytes = bytes;
-			}
-			node.exptime = exptime;
-
-			this.reorganizeCache(node);
-
-			node.casIds.flush();
-			node.casIds.add(casId, true);
-
-			this.cache.set(node.key, node);
-			if (node.exptime > 0) {
-				node.timeOut = setTimeout(
-					this.deleteNode,
-					exptime * 1000,
-					key,
-					this
-				);
-			} else if (node.exptime === 0) {
-				if (node.timeOut != null) {
-					clearTimeout(node.timeOut);
-				}
-			} else {
-				this.deleteNode(key);
-				return false;
-			}
-			return true;
+	};
+}
+/**
+ * Node which is passed through the arguments will be updated.
+ * @param {string} key - Key of the node that will be updated.
+ * @param {Number} flags - Updated flags of the node.
+ * @param {Number} exptime - Updated expiration time of the node.
+ * @param {Number} bytes - Updated bytes of the node.
+ * @param {string} datablock - Updated datablock of the node.
+ * @param {string} apOrPrePend - The string tells us if we need to append, prepend or if the
+ * data just needs to be updated.
+ * @param {Number} casId - Number that identifies the user that's updating the node.
+ * @returns {Boolean} - It tells us if the node of the given key was updated or not.
+ */
+const updateNode = (
+	key,
+	flags,
+	exptime,
+	bytes,
+	datablock,
+	casId,
+	apOrPrePend = null
+) => {
+	const node = Memcached.cache.get(key);
+	if (node != null) {
+		node.flags = flags;
+		if (apOrPrePend === "append") {
+			node.datablock = node.datablock + datablock;
+			node.bytes = node.bytes + bytes;
+		} else if (apOrPrePend === "prepend") {
+			node.datablock = datablock + node.datablock;
+			node.bytes = bytes + node.bytes;
 		} else {
-			return false;
+			node.datablock = datablock;
+			node.bytes = bytes;
 		}
-	}
+		node.exptime = exptime;
 
-	/**
-	 * This function allows us to reorganize the cache of the memcached, by moving the desired node
-	 * to the head of the LRU.
-	 * @param {Node} node - Key(s) of the node(s) to retrieve from memcached.
-	 */
-	reorganizeCache(node) {
-		if (node.prev != null) {
-			node.prev.next = node.next;
-		}
-		if (node.next != null) {
-			node.next.prev = node.prev;
-			node.next = this.head;
-		}
-		node.prev = null;
-		this.head = node;
-	}
+		reorganizeCache(node);
 
-	/**
-	 * Deletes the Node with the key given from the memcached.
-	 * @param {Number} key - Key of the node that will be deleted.
-	 * @param {Memcached} memcached - Memcached where we are working on.
-	 * @returns {Boolean} - Returns if the node was deleted or not.
-	 */
-	deleteNode(key, memcached = this) {
-		const node = memcached.cache.get(key);
-		if (node != null) {
-			if (node.prev != null) {
-				node.prev.next = node.next;
-			} else {
-				this.head = node.next;
-			}
+		node.casIds.flush();
+		node.casIds.add(casId, true);
 
-			if (node.next != null) {
-				node.next.prev = node.prev;
-			} else {
-				this.tail = node.prev;
-			}
-
-			if (node.timeOut) {
+		Memcached.cache.set(node.key, node);
+		if (node.exptime > 0) {
+			node.timeOut = setTimeout(deleteNode, exptime * 1000, key);
+		} else if (node.exptime === 0) {
+			if (node.timeOut != null) {
 				clearTimeout(node.timeOut);
 			}
-
-			node.casIds.flush();
-			memcached.cache.delete(key);
-			return true;
 		} else {
+			deleteNode(key);
 			return false;
 		}
+		return true;
+	} else {
+		return false;
 	}
-}
+};
+
+/**
+ * This function allows us to reorganize the cache of the memcached, by moving the desired node
+ * to the head of the LRU.
+ * @param {Node} node - Key(s) of the node(s) to retrieve from memcached.
+ */
+const reorganizeCache = (node) => {
+	if (node.prev != null) {
+		node.prev.next = node.next;
+	}
+	if (node.next != null) {
+		node.next.prev = node.prev;
+		node.next = Memcached.head;
+	}
+	node.prev = null;
+	Memcached.head = node;
+};
+
+/**
+ * Deletes the Node with the key given from the memcached.
+ * @param {Number} key - Key of the node that will be deleted.
+ * @param {Memcached} memcached - Memcached where we are working on.
+ * @returns {Boolean} - Returns if the node was deleted or not.
+ */
+const deleteNode = (key) => {
+	const node = Memcached.cache.get(key);
+	if (node != null) {
+		if (node.prev != null) {
+			node.prev.next = node.next;
+		} else {
+			Memcached.head = node.next;
+		}
+
+		if (node.next != null) {
+			node.next.prev = node.prev;
+		} else {
+			Memcached.tail = node.prev;
+		}
+
+		if (node.timeOut) {
+			clearTimeout(node.timeOut);
+		}
+
+		node.casIds.flush();
+		Memcached.cache.delete(key);
+		return true;
+	} else {
+		return false;
+	}
+};
+
+/**
+ * This function makes sure that the limit of the memcached is being respected; if it's about
+ * to be passed, it deletes the least used node of the memcached.
+ */
+const ensureLimit = () => {
+	if (Memcached.cache.size === Memcached.limit) {
+		deleteNode(Memcached.tail.key);
+	}
+};
 
 module.exports = Memcached;
