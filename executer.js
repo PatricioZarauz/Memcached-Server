@@ -1,12 +1,12 @@
+const Client = require("./client");
 const Memcached = require("./memcached");
 
 class Executer {
 	/**
 	 * This function allows us to execute the correct memcached function depending on the
-	 * parameters saved.
-	 * @param {[string | Number | Boolean]} parameters - The paramaters that will be given
-	 * to the corresponding function of the memcached.
-	 * @param {Number} casID - The number that uniquely identifies the client
+	 * clients command.
+	 * @param {Client} client - The client where the parameters of the function to execute are stored.
+	 * @returns {string} The memcached response of the selected function.
 	 */
 	static memcachedFunction = ({
 		command,
@@ -91,13 +91,21 @@ class Executer {
 		return commands[command]();
 	};
 
-	static memcachedGet = (keys, { userId }) => {
-		return Memcached.get(keys, userId);
-	};
+	/**
+	 * This function allows us to execute the memcached get function.
+	 * @param {[string]} keys - The key(s) that want to be retrieved.
+	 * @param {Client} client - The client where its userId is stored.
+	 * @returns {string} The memcached response of the get function.
+	 */
+	static memcachedGet = (keys, { userId }) => Memcached.get(keys, userId);
 
-	static memcachedGets = (keys, { userId }) => {
-		return Memcached.gets(keys, userId);
-	};
+	/**
+	 * This function allows us to execute the memcached gets function.
+	 * @param {[string]} keys - The key(s) that want to be retrieved.
+	 * @param {Client} client - The client where its userId is stored.
+	 * @returns {string} The memcached response of the gets function.
+	 */
+	static memcachedGets = (keys, { userId }) => Memcached.gets(keys, userId);
 }
 
 module.exports = Executer;
