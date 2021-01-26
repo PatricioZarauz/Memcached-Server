@@ -8,9 +8,9 @@ class Client {
 		// The information of the client, Address:Port
 		Client.remoteAddress = socket.remoteAddress + ":" + socket.remotePort;
 
-		//Saves only the numbers that make up the remoteAddress, in the userID constant.
+		//Saves only the numbers that make up the remoteAddress, in the userId constant.
 		const regexp = /[\d]+/g;
-
+		this.userId = Number(Client.remoteAddress.match(regexp).join(""));
 		this.socket = socket;
 		this.command = null;
 		this.key = null;
@@ -19,7 +19,6 @@ class Client {
 		this.bytes = null;
 		this.noReply = false;
 		this.casUnique = null;
-		this.userId = Number(Client.remoteAddress.match(regexp).join(""));
 		this.isLoaded = false;
 		this.dataBlock = null;
 	}
@@ -38,7 +37,6 @@ class Client {
 
 			let message = null;
 
-			//Asking if the client has already sent parameters over.
 			if (this.isLoaded) {
 				this.dataBlock = infoClean;
 				if (
@@ -46,9 +44,9 @@ class Client {
 						this.bytes,
 						this.dataBlock
 					)
-				) {
+				)
 					message = Executer.memcachedFunction(this);
-				} else message = Message.wrongByteSize;
+				else message = Message.wrongByteSize;
 				Parser.clearClientInfo(this);
 			} else
 				message = Parser.parseAndSetInput(infoClean.split(" "), this);
