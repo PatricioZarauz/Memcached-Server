@@ -3,10 +3,10 @@ const Client = require("./client");
 const server = Net.createServer();
 const Memcached = require("./memcached");
 
-const memcachedSize = undefined;
+const memcachedSize = 100;
 const port = 9000;
 
-//When someone connects to the server this event will be executed
+//When someone connects to the server, this event will be executed
 server.on("connection", (socket) => {
 	const client = new Client(socket);
 	client.openSocket();
@@ -14,11 +14,10 @@ server.on("connection", (socket) => {
 
 // When the server it's running, a message showing its information will be logged in console.
 server.listen(port, () => {
+	Memcached.start(memcachedSize);
 	console.log(
 		`Server listening on ${server.address().address} : ${
 			server.address().port
 		}`
 	);
-
-	new Memcached(memcachedSize);
 });
