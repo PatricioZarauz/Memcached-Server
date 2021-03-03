@@ -140,7 +140,7 @@ class Memcached {
 
 			if (Memcached.head.exptime > 0)
 				Memcached.head.timeOut = setTimeout(
-					deleteNode,
+					this.deleteNode,
 					exptime * 1000,
 					key
 				);
@@ -395,7 +395,7 @@ class Memcached {
 			Memcached.cache.set(node.key, node);
 
 			if (node.exptime > 0)
-				node.timeOut = setTimeout(deleteNode, exptime * 1000, key);
+				node.timeOut = setTimeout(this.deleteNode, exptime * 1000, key);
 			else if (node.exptime === 0) {
 				if (node.timeOut != null) clearTimeout(node.timeOut);
 			} else {
